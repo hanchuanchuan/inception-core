@@ -840,7 +840,6 @@ var defaultConf = Config{
 		ErrUseValueExpr:                 1,
 		ErrWrongAndExpr:                 1,
 	},
-	oscProcessList: make(map[string]*util.OscProcessInfo, 0),
 }
 
 var globalConf = defaultConf
@@ -848,7 +847,6 @@ var globalConf = defaultConf
 // NewConfig creates a new config instance with default value.
 func NewConfig() *Config {
 	conf := defaultConf
-	conf.oscProcessList = make(map[string]*util.OscProcessInfo, 0)
 	return &conf
 }
 
@@ -897,6 +895,9 @@ const (
 
 // AddOscProcess 添加osc进程
 func (c *Config) AddOscProcess(p *util.OscProcessInfo) {
+	if c.oscProcessList == nil {
+		c.oscProcessList = make(map[string]*util.OscProcessInfo, 16)
+	}
 	c.oscProcessList[p.Sqlsha1] = p
 }
 

@@ -146,20 +146,20 @@ func (s *testCommon) initSetUp(c *C) {
 	log.Error("数据库版本: ", s.DBVersion)
 
 	// 测试API接口时自动忽略之前的测试方法
-
-	log.Errorf("is api: %v", isAPI)
 	s.isAPI = isAPI
-	if isAPI {
-		s.sessionService = session.NewInception()
-		// s.sessionService.SetSessionManager(server)
-		s.sessionService.LoadOptions(session.SourceOptions{
-			Host:         inc.BackupHost,
-			Port:         int(inc.BackupPort),
-			User:         inc.BackupUser,
-			Password:     inc.BackupPassword,
-			RealRowCount: s.realRowCount,
-		})
+	s.sessionService = session.NewInception()
+	s.sessionService.LoadOptions(session.SourceOptions{
+		Host:         inc.BackupHost,
+		Port:         int(inc.BackupPort),
+		User:         inc.BackupUser,
+		Password:     inc.BackupPassword,
+		RealRowCount: s.realRowCount,
+	})
+
+	if s.tk == nil {
+		s.tk = testkit.NewTestKitWithInit(c, s.store)
 	}
+
 }
 
 func (s *testCommon) tearDownSuite(c *C) {

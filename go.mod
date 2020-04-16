@@ -20,6 +20,7 @@ require (
 	github.com/cznic/strutil v0.0.0-20181122101858-275e90344537
 	github.com/cznic/y v0.0.0-20181122101901-b05e8c2e8d7b
 	github.com/dlclark/regexp2 v1.2.0 // indirect
+	github.com/etcd-io/gofail v0.0.0-20180808172546-51ce9a71510a
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/gofrs/uuid v3.2.0+incompatible
 	github.com/golang/protobuf v1.3.1

@@ -141,10 +141,7 @@ todo:
 	@grep -n BUG */*.go parser/parser.y || true
 	@grep -n println */*.go parser/parser.y || true
 
-test: checklist gotest explaintest
-
-explaintest: server
-	@cd cmd/explaintest && ./run-tests.sh -s ../../bin/inception-core
+test: checklist gotest
 
 gotest: parserlib
 	$(GO) get github.com/etcd-io/gofail@v0.0.0-20180808172546-51ce9a71510a

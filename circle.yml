@@ -40,7 +40,6 @@ jobs:
       - run: rm -f go.sum
       - run: sudo wget -O /usr/local/bin/pt-online-schema-change percona.com/get/pt-online-schema-change
       - run: sudo chmod +x /usr/local/bin/pt-online-schema-change
-      - run: sudo chmod +x cmd/explaintest/run-tests.sh
 
       - restore_cache:
           keys:

@@ -18,7 +18,7 @@
 package inception
 
 import (
-	"github.com/hanchuanchuan/goInception/mysql"
+	"github.com/hanchuanchuan/inception-core/mysql"
 )
 
 // 数据库类型

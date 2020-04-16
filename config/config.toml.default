@@ -8,6 +8,9 @@ port = 4000
 # TiDB数据库目录
 path = "/tmp/tidb"
 
+# 忽略终端连接断开信号
+ignore_sighup = true
+
 [log]
 # 日志级别: debug, info, warn, error, fatal.
 level = "info"
@@ -198,6 +201,8 @@ er_invalid_ident = 1
 er_join_no_on_condition = 1
 er_json_type_support = 2
 er_must_have_columns = 1
+er_columns_must_have_index = 1
+er_columns_must_have_index_type_err = 1
 er_no_where_condition = 1
 er_not_allowed_nullable = 1
 er_ordery_by_rand = 1

@@ -20,13 +20,12 @@ import (
 
 	// "fmt"
 	"io/ioutil"
-	"time"
 
 	"github.com/BurntSushi/toml"
-	"github.com/hanchuanchuan/goInception/mysql"
-	"github.com/hanchuanchuan/goInception/util/logutil"
+	"github.com/hanchuanchuan/inception-core/mysql"
+	"github.com/hanchuanchuan/inception-core/util"
+	"github.com/hanchuanchuan/inception-core/util/logutil"
 	"github.com/pingcap/errors"
-	tracing "github.com/uber/jaeger-client-go/config"
 )
 
 // Config number limitations
@@ -71,7 +70,6 @@ type Config struct {
 	Status              Status            `toml:"status" json:"status"`
 	Performance         Performance       `toml:"performance" json:"performance"`
 	PreparedPlanCache   PreparedPlanCache `toml:"prepared-plan-cache" json:"prepared-plan-cache"`
-	OpenTracing         OpenTracing       `toml:"opentracing" json:"opentracing"`
 	ProxyProtocol       ProxyProtocol     `toml:"proxy-protocol" json:"proxy-protocol"`
 	TiKVClient          TiKVClient        `toml:"tikv-client" json:"tikv-client"`
 	Binlog              Binlog            `toml:"binlog" json:"binlog"`
@@ -83,6 +81,12 @@ type Config struct {
 
 	// 是否跳过用户权限校验
 	SkipGrantTable bool `toml:"skip_grant_table" json:"skip_grant_table"`
+
+	// 忽略终端连接断开信号
+	IgnoreSighup bool `toml:"ignore_sighup" json:"ignore_sighup"`
+
+	// osc进程列表
+	oscProcessList map[string]*util.OscProcessInfo
 }
 
 // Log is the log section of config.
@@ -96,10 +100,8 @@ type Log struct {
 	// File log config.
 	File logutil.FileLogConfig `toml:"file" json:"file"`
 
-	SlowQueryFile      string `toml:"slow-query-file" json:"slow-query-file"`
-	SlowThreshold      uint   `toml:"slow-threshold" json:"slow-threshold"`
-	ExpensiveThreshold uint   `toml:"expensive-threshold" json:"expensive-threshold"`
-	QueryLogMaxLen     uint   `toml:"query-log-max-len" json:"query-log-max-len"`
+	ExpensiveThreshold uint `toml:"expensive-threshold" json:"expensive-threshold"`
+	QueryLogMaxLen     uint `toml:"query-log-max-len" json:"query-log-max-len"`
 }
 
 // Security is the security section of the config.
@@ -185,33 +187,6 @@ type TxnLocalLatches struct {
 type PreparedPlanCache struct {
 	Enabled  bool `toml:"enabled" json:"enabled"`
 	Capacity uint `toml:"capacity" json:"capacity"`
-}
-
-// OpenTracing is the opentracing section of the config.
-type OpenTracing struct {
-	Enable     bool                `toml:"enable" json:"enbale"`
-	Sampler    OpenTracingSampler  `toml:"sampler" json:"sampler"`
-	Reporter   OpenTracingReporter `toml:"reporter" json:"reporter"`
-	RPCMetrics bool                `toml:"rpc-metrics" json:"rpc-metrics"`
-}
-
-// OpenTracingSampler is the config for opentracing sampler.
-// See https://godoc.org/github.com/uber/jaeger-client-go/config#SamplerConfig
-type OpenTracingSampler struct {
-	Type                    string        `toml:"type" json:"type"`
-	Param                   float64       `toml:"param" json:"param"`
-	SamplingServerURL       string        `toml:"sampling-server-url" json:"sampling-server-url"`
-	MaxOperations           int           `toml:"max-operations" json:"max-operations"`
-	SamplingRefreshInterval time.Duration `toml:"sampling-refresh-interval" json:"sampling-refresh-interval"`
-}
-
-// OpenTracingReporter is the config for opentracing reporter.
-// See https://godoc.org/github.com/uber/jaeger-client-go/config#ReporterConfig
-type OpenTracingReporter struct {
-	QueueSize           int           `toml:"queue-size" json:"queue-size"`
-	BufferFlushInterval time.Duration `toml:"buffer-flush-interval" json:"buffer-flush-interval"`
-	LogSpans            bool          `toml:"log-spans" json:"log-spans"`
-	LocalAgentHostPort  string        `toml:"local-agent-host-port" json:"local-agent-host-port"`
 }
 
 // ProxyProtocol is the PROXY protocol section of the config.
@@ -359,6 +334,8 @@ type Inc struct {
 
 	// 建表必须创建的列. 可指定多个列,以逗号分隔.列类型可选. 格式: 列名 [列类型,可选],...
 	MustHaveColumns string `toml:"must_have_columns" json:"must_have_columns"`
+	// 如果表包含以下列，列必须有索引。可指定多个列,以逗号分隔.列类型可选.   格式: 列名 [列类型,可选],...
+	ColumnsMustHaveIndex string `toml:"columns_must_have_index" json:"columns_must_have_index"`
 
 	// 是否跳过用户权限校验
 	SkipGrantTable bool `toml:"skip_grant_table" json:"skip_grant_table"`
@@ -621,6 +598,8 @@ type IncLevel struct {
 	ER_INVALID_DATA_TYPE            int8 `toml:"er_invalid_data_type"`
 	ER_INVALID_IDENT                int8 `toml:"er_invalid_ident"`
 	ER_MUST_HAVE_COLUMNS            int8 `toml:"er_must_have_columns"`
+	ErrColumnsMustHaveIndex         int8 `toml:"er_columns_must_have_index"`
+	ErrColumnsMustHaveIndexTypeErr  int8 `toml:"er_columns_must_have_index_type_err"`
 	ER_NO_WHERE_CONDITION           int8 `toml:"er_no_where_condition"`
 	ER_NOT_ALLOWED_NULLABLE         int8 `toml:"er_not_allowed_nullable"`
 	ER_ORDERY_BY_RAND               int8 `toml:"er_ordery_by_rand"`
@@ -652,6 +631,7 @@ type IncLevel struct {
 	ErJsonTypeSupport               int8 `toml:"er_json_type_support"`
 	ErrImplicitTypeConversion       int8 `toml:"er_implicit_type_conversion"`
 	ErrJoinNoOnCondition            int8 `toml:"er_join_no_on_condition"`
+	ErrUseValueExpr                 int8 `toml:"er_use_value_expr"`
 	ErrWrongAndExpr                 int8 `toml:"er_wrong_and_expr"`
 }
 
@@ -682,7 +662,6 @@ var defaultConf = Config{
 			LogRotate: true,
 			MaxSize:   logutil.DefaultLogMaxSize,
 		},
-		SlowThreshold:      300,
 		ExpensiveThreshold: 10000,
 		QueryLogMaxLen:     2048,
 	},
@@ -712,14 +691,6 @@ var defaultConf = Config{
 		Enabled:  false,
 		Capacity: 100,
 	},
-	OpenTracing: OpenTracing{
-		Enable: false,
-		Sampler: OpenTracingSampler{
-			Type:  "const",
-			Param: 1.0,
-		},
-		Reporter: OpenTracingReporter{},
-	},
 	TiKVClient: TiKVClient{
 		GrpcConnectionCount:  16,
 		GrpcKeepAliveTime:    10,
@@ -732,6 +703,7 @@ var defaultConf = Config{
 	// 默认跳过权限校验 2019-1-26
 	// 为配置方便,在config节点也添加相同参数
 	SkipGrantTable: true,
+	IgnoreSighup:   true,
 	Security: Security{
 		SkipGrantTable: true,
 	},
@@ -832,6 +804,8 @@ var defaultConf = Config{
 		ER_INVALID_DATA_TYPE:            1,
 		ER_INVALID_IDENT:                1,
 		ER_MUST_HAVE_COLUMNS:            1,
+		ErrColumnsMustHaveIndex:         1,
+		ErrColumnsMustHaveIndexTypeErr:  1,
 		ER_NO_WHERE_CONDITION:           1,
 		ER_NOT_ALLOWED_NULLABLE:         1,
 		ER_ORDERY_BY_RAND:               1,
@@ -863,8 +837,10 @@ var defaultConf = Config{
 		ErJsonTypeSupport:               2,
 		ErrImplicitTypeConversion:       1,
 		ErrJoinNoOnCondition:            1,
+		ErrUseValueExpr:                 1,
 		ErrWrongAndExpr:                 1,
 	},
+	oscProcessList: make(map[string]*util.OscProcessInfo, 0),
 }
 
 var globalConf = defaultConf
@@ -872,6 +848,7 @@ var globalConf = defaultConf
 // NewConfig creates a new config instance with default value.
 func NewConfig() *Config {
 	conf := defaultConf
+	conf.oscProcessList = make(map[string]*util.OscProcessInfo, 0)
 	return &conf
 }
 
@@ -900,29 +877,7 @@ func (l *Log) ToLogConfig() *logutil.LogConfig {
 		Format:           l.Format,
 		DisableTimestamp: l.DisableTimestamp,
 		File:             l.File,
-		SlowQueryFile:    l.SlowQueryFile,
 	}
-}
-
-// ToTracingConfig converts *OpenTracing to *tracing.Configuration.
-func (t *OpenTracing) ToTracingConfig() *tracing.Configuration {
-	ret := &tracing.Configuration{
-		Disabled:   !t.Enable,
-		RPCMetrics: t.RPCMetrics,
-		Reporter:   &tracing.ReporterConfig{},
-		Sampler:    &tracing.SamplerConfig{},
-	}
-	ret.Reporter.QueueSize = t.Reporter.QueueSize
-	ret.Reporter.BufferFlushInterval = t.Reporter.BufferFlushInterval
-	ret.Reporter.LogSpans = t.Reporter.LogSpans
-	ret.Reporter.LocalAgentHostPort = t.Reporter.LocalAgentHostPort
-
-	ret.Sampler.Type = t.Sampler.Type
-	ret.Sampler.Param = t.Sampler.Param
-	ret.Sampler.SamplingServerURL = t.Sampler.SamplingServerURL
-	ret.Sampler.MaxOperations = t.Sampler.MaxOperations
-	ret.Sampler.SamplingRefreshInterval = t.Sampler.SamplingRefreshInterval
-	return ret
 }
 
 func init() {
@@ -939,3 +894,13 @@ const (
 	OOMActionCancel = "cancel"
 	OOMActionLog    = "log"
 )
+
+// AddOscProcess 添加osc进程
+func (c *Config) AddOscProcess(p *util.OscProcessInfo) {
+	c.oscProcessList[p.Sqlsha1] = p
+}
+
+// ShowOscProcessList 返回osc进程列表
+func (c *Config) ShowOscProcessList() map[string]*util.OscProcessInfo {
+	return c.oscProcessList
+}

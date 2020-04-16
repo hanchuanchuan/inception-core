@@ -35,10 +35,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/hanchuanchuan/goInception/ast"
-	"github.com/hanchuanchuan/goInception/format"
-	"github.com/hanchuanchuan/goInception/util"
-	"github.com/hanchuanchuan/goInception/util/auth"
+	"github.com/hanchuanchuan/inception-core/ast"
+	"github.com/hanchuanchuan/inception-core/format"
+	"github.com/hanchuanchuan/inception-core/util"
+	"github.com/hanchuanchuan/inception-core/util/auth"
 
 	"github.com/hanchuanchuan/gh-ost/go/base"
 	"github.com/hanchuanchuan/gh-ost/go/logic"

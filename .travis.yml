@@ -1,6 +1,6 @@
 language: go
 
-go_import_path: github.com/hanchuanchuan/goInception
+go_import_path: github.com/hanchuanchuan/inception-core
 
 go:
   - "1.12"
@@ -15,7 +15,7 @@ services:
 # - docker
 - mysql
 
-# SHORT=1 跳过goInception审核和执行测试
+# SHORT=1 跳过inception-core审核和执行测试
 
 env:
   - TRAVIS_COVERAGE=0

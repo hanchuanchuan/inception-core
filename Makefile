@@ -16,6 +16,8 @@ GOBUILD   := CGO_ENABLED=0 $(GO) build $(BUILD_FLAG)
 
 VERSION := $(shell git describe --tags --dirty)
 
+VERSION_EASY := $(shell git describe --tags)
+
 # 指定部分单元测试跳过
 ifeq ("$(SHORT)", "1")
 	GOTEST    := CGO_ENABLED=1 $(GO) test -p 3 -short
@@ -37,19 +39,19 @@ FILES     := $$(find $$($(PACKAGE_DIRECTORIES)) -name "*.go" | grep -vE "vendor"
 GOFAIL_ENABLE  := $$(find $$PWD/ -type d | grep -vE "(\.git|vendor)" | xargs gofail enable)
 GOFAIL_DISABLE := $$(find $$PWD/ -type d | grep -vE "(\.git|vendor)" | xargs gofail disable)
 
-LDFLAGS += -X "github.com/hanchuanchuan/goInception/mysql.TiDBReleaseVersion=$(shell git describe --tags --dirty)"
-LDFLAGS += -X "github.com/hanchuanchuan/goInception/util/printer.TiDBBuildTS=$(shell date '+%Y-%m-%d %H:%M:%S')"
-LDFLAGS += -X "github.com/hanchuanchuan/goInception/util/printer.TiDBGitHash=$(shell git rev-parse HEAD)"
-LDFLAGS += -X "github.com/hanchuanchuan/goInception/util/printer.TiDBGitBranch=$(shell git rev-parse --abbrev-ref HEAD)"
-LDFLAGS += -X "github.com/hanchuanchuan/goInception/util/printer.GoVersion=$(shell go version)"
+LDFLAGS += -X "github.com/hanchuanchuan/inception-core/mysql.TiDBReleaseVersion=$(shell git describe --tags --dirty)"
+LDFLAGS += -X "github.com/hanchuanchuan/inception-core/util/printer.TiDBBuildTS=$(shell date '+%Y-%m-%d %H:%M:%S')"
+LDFLAGS += -X "github.com/hanchuanchuan/inception-core/util/printer.TiDBGitHash=$(shell git rev-parse HEAD)"
+LDFLAGS += -X "github.com/hanchuanchuan/inception-core/util/printer.TiDBGitBranch=$(shell git rev-parse --abbrev-ref HEAD)"
+LDFLAGS += -X "github.com/hanchuanchuan/inception-core/util/printer.GoVersion=$(shell go version)"
 
-TEST_LDFLAGS =  -X "github.com/hanchuanchuan/goInception/config.checkBeforeDropLDFlag=1"
+TEST_LDFLAGS =  -X "github.com/hanchuanchuan/inception-core/config.checkBeforeDropLDFlag=1"
 
 CHECK_LDFLAGS += $(LDFLAGS) ${TEST_LDFLAGS}
 
 TARGET = ""
 
-.PHONY: all build update parser clean todo test gotest interpreter server dev benchkv benchraw check parserlib checklist
+.PHONY: all build update parser clean todo test gotest interpreter server dev check parserlib checklist testapi
 
 default: server buildsucc
 
@@ -58,7 +60,7 @@ server-admin-check: server_check buildsucc
 buildsucc:
 	@echo Build TiDB Server successfully!
 
-all: dev server benchkv
+all: dev server
 
 # dev: checklist parserlib test check
 dev: checklist parserlib test
@@ -142,7 +144,7 @@ todo:
 test: checklist gotest explaintest
 
 explaintest: server
-	@cd cmd/explaintest && ./run-tests.sh -s ../../bin/goInception
+	@cd cmd/explaintest && ./run-tests.sh -s ../../bin/inception-core
 
 gotest: parserlib
 	$(GO) get github.com/etcd-io/gofail@v0.0.0-20180808172546-51ce9a71510a
@@ -152,16 +154,30 @@ ifeq ("$(TRAVIS_COVERAGE)", "1")
 	@export log_level=error; \
 	go get github.com/go-playground/overalls
 	# go get github.com/mattn/goveralls
-	# $(OVERALLS) -project=github.com/hanchuanchuan/goInception -covermode=count -ignore='.git,vendor,cmd,docs,LICENSES' || { $(GOFAIL_DISABLE); exit 1; }
+	# $(OVERALLS) -project=github.com/hanchuanchuan/inception-core -covermode=count -ignore='.git,vendor,cmd,docs,LICENSES' || { $(GOFAIL_DISABLE); exit 1; }
 	# $(GOVERALLS) -service=travis-ci -coverprofile=overalls.coverprofile || { $(GOFAIL_DISABLE); exit 1; }
 
-	$(OVERALLS) -project=github.com/hanchuanchuan/goInception -covermode=count -ignore='.git,vendor,cmd,docs,LICENSES' -concurrency=1 -- -short || { $(GOFAIL_DISABLE); exit 1; }
+	$(OVERALLS) -project=github.com/hanchuanchuan/inception-core -covermode=count -ignore='.git,vendor,cmd,docs,LICENSES' -concurrency=1 -- -short || { $(GOFAIL_DISABLE); exit 1; }
+else
+
+ifeq ("$(API)", "1")
+	@echo "Running in native mode (API)."
+	@export log_level=error;
+	$(GOTEST) -timeout 30m -ldflags '$(TEST_LDFLAGS)' github.com/hanchuanchuan/inception-core/session -api
 else
 	@echo "Running in native mode."
-	@export log_level=error; \
+	@export log_level=error;
 	$(GOTEST) -timeout 30m -ldflags '$(TEST_LDFLAGS)' -cover $(PACKAGES) || { $(GOFAIL_DISABLE); exit 1; }
 endif
+
+endif
 	@$(GOFAIL_DISABLE)
+
+testapi: parserlib
+	@echo "Running in native mode (API)."
+	@export log_level=error;
+	$(GOTEST) -timeout 30m -ldflags '$(TEST_LDFLAGS)' github.com/hanchuanchuan/inception-core/session -api
+
 
 race: parserlib
 	$(GO) get github.com/etcd-io/gofail@v0.0.0-20180808172546-51ce9a71510a
@@ -194,32 +210,6 @@ ifeq ("$(WITH_CHECK)", "1")
 	CHECK_FLAG = $(TEST_LDFLAGS)
 endif
 
-server: parserlib
-ifeq ($(TARGET), "")
-	$(GOBUILD) $(RACE_FLAG) -ldflags '$(LDFLAGS) $(CHECK_FLAG)' -o bin/goInception tidb-server/main.go
-else
-	$(GOBUILD) $(RACE_FLAG) -ldflags '$(LDFLAGS) $(CHECK_FLAG)' -o '$(TARGET)' tidb-server/main.go
-endif
-
-server_check: parserlib
-ifeq ($(TARGET), "")
-	$(GOBUILD) $(RACE_FLAG) -ldflags '$(CHECK_LDFLAGS)' -o bin/goInception tidb-server/main.go
-else
-	$(GOBUILD) $(RACE_FLAG) -ldflags '$(CHECK_LDFLAGS)' -o '$(TARGET)' tidb-server/main.go
-endif
-
-benchkv:
-	$(GOBUILD) -ldflags '$(LDFLAGS)' -o bin/benchkv cmd/benchkv/main.go
-
-benchraw:
-	$(GOBUILD) -ldflags '$(LDFLAGS)' -o bin/benchraw cmd/benchraw/main.go
-
-benchdb:
-	$(GOBUILD) -ldflags '$(LDFLAGS)' -o bin/benchdb cmd/benchdb/main.go
-
-importer:
-	$(GOBUILD) -ldflags '$(LDFLAGS)' -o bin/importer ./cmd/importer
-
 update:
 	which dep 2>/dev/null || go get -u github.com/golang/dep/cmd/dep
 ifdef PKG
@@ -249,32 +239,3 @@ ifeq ("$(TRAVIS_COVERAGE)", "1")
 	bash <(curl -s https://codecov.io/bash)
 endif
 
-
-# 	windows无法build,github.com/outbrain/golib有引用syslog.Writer,其在windows未实现.
-.PHONY: release
-release:
-	@echo "$(CGREEN)Cross platform building for release ...$(CEND)"
-	@mkdir -p release
-	@for GOOS in darwin linux; do \
-		for GOARCH in amd64; do \
-			echo "Building $${GOOS}-$${GOARCH} ..."; \
-			GOOS=$${GOOS} GOARCH=amd64 $(GOBUILD) -ldflags '-s -w $(LDFLAGS)'  -o goInception tidb-server/main.go; \
-			tar -czf release/goInception-$${GOOS}-amd64-${VERSION}.tar.gz goInception config/config.toml.default; \
-			rm -f goInception; \
-		done ;\
-	done
-
-docker:
-	@if [ ! -f bin/percona-toolkit.tar.gz ];then \
-		wget -O bin/percona-toolkit.tar.gz https://www.percona.com/downloads/percona-toolkit/3.0.4/source/tarball/percona-toolkit-3.0.4.tar.gz; \
-	fi
-	@if [ ! -f bin/pt-online-schema-change ];then \
-		wget -O bin/pt-online-schema-change percona.com/get/pt-online-schema-change; \
-	fi
-	GOOS=linux GOARCH=amd64 $(GOBUILD) -ldflags '-s -w $(LDFLAGS)' -o bin/goInception tidb-server/main.go
-	v1=$(shell git tag | awk -F'-' '{print $1}' |tail -1) && docker build -t hanchuanchuan/goinception:$${v1} . \
-	&& docker tag hanchuanchuan/goinception:$${v1} hanchuanchuan/goinception:latest
-
-docker-push:
-	v1=$(shell git tag|tail -1) && docker push hanchuanchuan/goinception:$${v1} \
-	&& docker push hanchuanchuan/goinception:latest

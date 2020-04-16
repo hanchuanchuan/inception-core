@@ -20,7 +20,6 @@ import (
 	"github.com/hanchuanchuan/inception-core/sessionctx/variable"
 	"github.com/hanchuanchuan/inception-core/types"
 	"github.com/hanchuanchuan/inception-core/util"
-	"github.com/hanchuanchuan/inception-core/util/kvcache"
 	binlog "github.com/pingcap/tipb/go-binlog"
 	"golang.org/x/net/context"
 )
@@ -30,7 +29,7 @@ type Context interface {
 	// NewTxn creates a new transaction for further execution.
 	// If old transaction is valid, it is committed first.
 	// It's used in BEGIN statement and DDL statements to commit old transaction.
-	NewTxn() error
+	// NewTxn() error
 
 	// Txn returns the current transaction which is created before executing a statement.
 	Txn() kv.Transaction
@@ -54,7 +53,7 @@ type Context interface {
 	// RefreshTxnCtx commits old transaction without retry,
 	// and creates a new transaction.
 	// now just for load data and batch insert.
-	RefreshTxnCtx(context.Context) error
+	// RefreshTxnCtx(context.Context) error
 
 	// ActivePendingTxn receives the pending transaction from the transaction channel.
 	// It should be called right before we builds an executor.
@@ -68,10 +67,10 @@ type Context interface {
 	GetStore() kv.Storage
 
 	// PreparedPlanCache returns the cache of the physical plan
-	PreparedPlanCache() *kvcache.SimpleLRUCache
+	// PreparedPlanCache() *kvcache.SimpleLRUCache
 
 	// StoreQueryFeedback stores the query feedback.
-	StoreQueryFeedback(feedback interface{})
+	// StoreQueryFeedback(feedback interface{})
 
 	// StmtCommit flush all changes by the statement to the underlying transaction.
 	StmtCommit()

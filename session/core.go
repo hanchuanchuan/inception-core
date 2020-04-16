@@ -70,18 +70,6 @@ func NewInception() *session {
 		isAPI:               true,
 	}
 
-	// cluster := mocktikv.NewCluster()
-	// mocktikv.BootstrapWithSingleStore(cluster)
-	// mvccStore := mocktikv.MustNewMVCCStore()
-	// store, err := mockstore.NewMockTikvStore(
-	// 	mockstore.WithCluster(cluster),
-	// 	mockstore.WithMVCCStore(mvccStore),
-	// )
-	// se.store = store
-
-	// session.SetSchemaLease(0)
-	// session.SetStatsLease(0)
-
 	se.sessionVars.GlobalVarsAccessor = se
 
 	tz := timeutil.InferSystemTZ()
@@ -117,7 +105,7 @@ func (s *session) init() {
 	s.parseIncLevel()
 
 	// 操作前重设上下文
-	ResetContextOfStmt(s)
+	s.ResetContextOfStmt()
 }
 
 // clear 清理变量或map等信息

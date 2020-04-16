@@ -210,20 +210,6 @@ const (
 	);`
 )
 
-// bootstrap initiates system DB for a store.
-func bootstrap(s Session) {
-	b, err := checkBootstrapped(s)
-	if err != nil {
-		log.Fatal(err)
-	}
-	if b {
-		upgrade(s)
-		return
-	}
-	doDDLWorks(s)
-	doDMLWorks(s)
-}
-
 const (
 	// The variable name in mysql.TiDB table.
 	// It is used for checking if the store is boostrapped by any TiDB server.
@@ -262,30 +248,6 @@ const (
 	version23 = 23
 	version24 = 24
 )
-
-func checkBootstrapped(s Session) (bool, error) {
-	//  Check if system db exists.
-	_, err := s.Execute(context.Background(), fmt.Sprintf("USE %s;", mysql.SystemDB))
-	if err != nil && infoschema.ErrDatabaseNotExists.NotEqual(err) {
-		log.Fatal(err)
-	}
-	// Check bootstrapped variable value in TiDB table.
-	sVal, _, err := getTiDBVar(s, bootstrappedVar)
-	if err != nil {
-		if infoschema.ErrTableNotExists.Equal(err) {
-			return false, nil
-		}
-		return false, errors.Trace(err)
-	}
-	isBootstrapped := sVal == bootstrappedVarTrue
-	if isBootstrapped {
-		// Make sure that doesn't affect the following operations.
-		if err = s.CommitTxn(context.Background()); err != nil {
-			return false, errors.Trace(err)
-		}
-	}
-	return isBootstrapped, nil
-}
 
 // getTiDBVar gets variable value from mysql.tidb table.
 // Those variables are used by TiDB server.
@@ -719,53 +681,6 @@ func doDDLWorks(s Session) {
 	mustExecute(s, CreateGCDeleteRangeDoneTable)
 	// Create stats_feedback table.
 	mustExecute(s, CreateStatsFeedbackTable)
-}
-
-// doDMLWorks executes DML statements in bootstrap stage.
-// All the statements run in a single transaction.
-func doDMLWorks(s Session) {
-	mustExecute(s, "BEGIN")
-
-	// Insert a default user with empty password.
-	mustExecute(s, `INSERT HIGH_PRIORITY INTO mysql.user VALUES
-		("%", "root", "", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y")`)
-
-	// Init global system variables table.
-	values := make([]string, 0, len(variable.SysVars))
-	for k, v := range variable.SysVars {
-		// Session only variable should not be inserted.
-		if v.Scope != variable.ScopeSession {
-			value := fmt.Sprintf(`("%s", "%s")`, strings.ToLower(k), v.Value)
-			values = append(values, value)
-		}
-	}
-	sql := fmt.Sprintf("INSERT HIGH_PRIORITY INTO %s.%s VALUES %s;", mysql.SystemDB, mysql.GlobalVariablesTable,
-		strings.Join(values, ", "))
-	mustExecute(s, sql)
-
-	sql = fmt.Sprintf(`INSERT HIGH_PRIORITY INTO %s.%s VALUES("%s", "%s", "Bootstrap flag. Do not delete.")
-		ON DUPLICATE KEY UPDATE VARIABLE_VALUE="%s"`,
-		mysql.SystemDB, mysql.TiDBTable, bootstrappedVar, bootstrappedVarTrue, bootstrappedVarTrue)
-	mustExecute(s, sql)
-
-	sql = fmt.Sprintf(`INSERT HIGH_PRIORITY INTO %s.%s VALUES("%s", "%d", "Bootstrap version. Do not delete.")`,
-		mysql.SystemDB, mysql.TiDBTable, tidbServerVersionVar, currentBootstrapVersion)
-	mustExecute(s, sql)
-
-	writeSystemTZ(s)
-	_, err := s.Execute(context.Background(), "COMMIT")
-	if err != nil {
-		time.Sleep(1 * time.Second)
-		// Check if TiDB is already bootstrapped.
-		b, err1 := checkBootstrapped(s)
-		if err1 != nil {
-			log.Fatal(err1)
-		}
-		if b {
-			return
-		}
-		log.Fatal(err)
-	}
 }
 
 func mustExecute(s Session, sql string) {

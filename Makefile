@@ -236,3 +236,10 @@ ifeq ("$(TRAVIS_COVERAGE)", "1")
 	bash <(curl -s https://codecov.io/bash)
 endif
 
+golint:
+	@echo -n "     REVIVE    "
+	@which revive > /dev/null; if [ $$? -ne 0 ]; then \
+		$(GO) get -u github.com/mgechev/revive; \
+	fi
+	@revive -formatter friendly -config .revive.toml ./...
+	@printf '%s\n' '$(OK)'

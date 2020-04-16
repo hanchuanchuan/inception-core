@@ -39,55 +39,15 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
-type domainMap struct {
-	// domains map[string]*domain.Domain
-	mu sync.Mutex
-}
-
-// func (dm *domainMap) Get(store kv.Storage) (d *domain.Domain, err error) {
-// 	key := store.UUID()
-// 	dm.mu.Lock()
-// 	defer dm.mu.Unlock()
-// 	d = dm.domains[key]
-// 	if d != nil {
-// 		return
-// 	}
-
-// 	ddlLease := time.Duration(0)
-// 	statisticLease := time.Duration(0)
-// 	ddlLease = schemaLease
-// 	statisticLease = statsLease
-// 	err = util.RunWithRetry(util.DefaultMaxRetries, util.RetryInterval, func() (retry bool, err1 error) {
-// 		log.Infof("store %v new domain, ddl lease %v, stats lease %d", store.UUID(), ddlLease, statisticLease)
-// 		factory := createSessionFunc(store)
-// 		sysFactory := createSessionWithDomainFunc(store)
-// 		d = domain.NewDomain(store, ddlLease, statisticLease, factory)
-// 		err1 = d.Init(ddlLease, sysFactory)
-// 		if err1 != nil {
-// 			// If we don't clean it, there are some dirty data when retrying the function of Init.
-// 			d.Close()
-// 			log.Errorf("[ddl] init domain failed %v", errors.ErrorStack(errors.Trace(err1)))
-// 		}
-// 		return true, errors.Trace(err1)
-// 	})
-// 	if err != nil {
-// 		return nil, errors.Trace(err)
-// 	}
-// 	dm.domains[key] = d
-
-// 	return
-// }
-
-// func (dm *domainMap) Delete(store kv.Storage) {
-// 	dm.mu.Lock()
-// 	delete(dm.domains, store.UUID())
-// 	dm.mu.Unlock()
+// type domainMap struct {
+// 	// domains map[string]*domain.Domain
+// 	mu sync.Mutex
 // }
 
 var (
-	domap = &domainMap{
-		// domains: map[string]*domain.Domain{},
-	}
+	// domap = &domainMap{
+	// 	// domains: map[string]*domain.Domain{},
+	// }
 	stores = make(map[string]kv.Driver)
 	// store.UUID()-> IfBootstrapped
 	storeBootstrapped     = make(map[string]bool)
@@ -105,18 +65,6 @@ var (
 	statsLease = 3 * time.Second
 )
 
-// SetSchemaLease changes the default schema lease time for DDL.
-// This function is very dangerous, don't use it if you really know what you do.
-// SetSchemaLease only affects not local storage after bootstrapped.
-func SetSchemaLease(lease time.Duration) {
-	schemaLease = lease
-}
-
-// SetStatsLease changes the default stats lease time for loading stats info.
-func SetStatsLease(lease time.Duration) {
-	statsLease = lease
-}
-
 // Parse parses a query string to raw ast.StmtNode.
 func Parse(ctx sessionctx.Context, src string) ([]ast.StmtNode, error) {
 	log.Debug("compiling", src)
@@ -129,48 +77,6 @@ func Parse(ctx sessionctx.Context, src string) ([]ast.StmtNode, error) {
 		return nil, errors.Trace(err)
 	}
 	return stmts, nil
-}
-
-// runStmt executes the ast.Statement and commit or rollback the current transaction.
-func runStmt(ctx context.Context, sctx sessionctx.Context, s ast.Statement) (ast.RecordSet, error) {
-	var err error
-	var rs ast.RecordSet
-	se := sctx.(*session)
-	rs, err = s.Exec(ctx)
-	// All the history should be added here.
-	se.GetSessionVars().TxnCtx.StatementCount++
-	if !s.IsReadOnly() {
-		if err == nil {
-			GetHistory(sctx).Add(0, s, se.sessionVars.StmtCtx)
-		}
-		if sctx.Txn() != nil {
-			if err != nil {
-				sctx.StmtRollback()
-			} else {
-				sctx.StmtCommit()
-			}
-		}
-	}
-	if !se.sessionVars.InTxn() {
-		if err != nil {
-			log.Info("RollbackTxn for ddl/autocommit error.")
-			err1 := se.RollbackTxn(ctx)
-			terror.Log(errors.Trace(err1))
-		} else {
-			err = se.CommitTxn(ctx)
-		}
-	} else {
-		// If the user insert, insert, insert ... but never commit, TiDB would OOM.
-		// So we limit the statement count in a transaction here.
-		history := GetHistory(sctx)
-		if history.Count() > int(config.GetGlobalConfig().Performance.StmtCountLimit) {
-			err1 := se.RollbackTxn(ctx)
-			terror.Log(errors.Trace(err1))
-			return rs, errors.Errorf("statement count %d exceeds the transaction limitation, autocommit = %t",
-				history.Count(), sctx.GetSessionVars().IsAutocommit())
-		}
-	}
-	return rs, errors.Trace(err)
 }
 
 // GetHistory get all stmtHistory in current txn. Exported only for test.

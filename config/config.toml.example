@@ -126,50 +126,6 @@ metrics-addr = ""
 # Prometheus client push interval in second, set \"0\" to disable prometheus push.
 metrics-interval = 15
 
-[performance]
-# Max CPUs to use, 0 use number of CPUs in the machine.
-max-procs = 0
-# StmtCountLimit limits the max count of statement inside a transaction.
-stmt-count-limit = 5000
-
-# Set keep alive option for tcp connection.
-tcp-keep-alive = false
-
-# Whether support cartesian product.
-cross-join = true
-
-# Stats lease duration, which influences the time of analyze and stats load.
-stats-lease = "0s"
-
-# Run auto analyze worker on this tidb-server.
-run-auto-analyze = false
-
-# Probability to use the query feedback to update stats, 0 or 1 for always false/true.
-feedback-probability = 0.0
-
-# The max number of query feedback that cache in memory.
-query-feedback-limit = 0
-
-# Pseudo stats will be used if the ratio between the modify count and
-# row count in statistics of a table is greater than it.
-pseudo-estimate-ratio = 0.8
-
-# Force the priority of all statements in a specified priority.
-# The value could be "NO_PRIORITY", "LOW_PRIORITY", "HIGH_PRIORITY" or "DELAYED".
-force-priority = "NO_PRIORITY"
-
-[proxy-protocol]
-# PROXY protocol acceptable client networks.
-# Empty string means disable PROXY protocol, * means all networks.
-networks = ""
-
-# PROXY protocol header read timeout, unit is second
-header-timeout = 5
-
-[prepared-plan-cache]
-enabled = false
-capacity = 100
-
 [tikv-client]
 # Max gRPC connections that will be established with each tikv-server.
 grpc-connection-count = 16

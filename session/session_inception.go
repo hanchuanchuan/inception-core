@@ -204,10 +204,6 @@ func (s *session) executeInc(ctx context.Context, sql string) (recordSets []sqle
 					})
 				}
 				return s.makeResult()
-
-				s.rollbackOnError(ctx)
-				log.Warnf("con:%d parse error:\n%v\n%s", connID, err, s1)
-				return nil, errors.Trace(err)
 			}
 
 			for i, stmtNode := range stmtNodes {
@@ -443,15 +439,6 @@ func (s *session) executeInc(ctx context.Context, sql string) (recordSets []sqle
 	}
 
 	return s.makeResult()
-
-	if s.sessionVars.ClientCapability&mysql.ClientMultiResults == 0 && len(recordSets) > 1 {
-		// return the first recordset if client doesn't support ClientMultiResults.
-		recordSets = recordSets[:1]
-	}
-
-	// t := &testStatisticsSuite{}
-
-	return recordSets, nil
 }
 
 func (s *session) makeResult() (recordSets []sqlexec.RecordSet, err error) {

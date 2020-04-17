@@ -19,7 +19,6 @@ package table
 
 import (
 	"github.com/hanchuanchuan/inception-core/kv"
-	"github.com/hanchuanchuan/inception-core/meta/autoid"
 	"github.com/hanchuanchuan/inception-core/model"
 	"github.com/hanchuanchuan/inception-core/mysql"
 	"github.com/hanchuanchuan/inception-core/sessionctx"
@@ -92,7 +91,7 @@ type Table interface {
 	IterRecords(ctx sessionctx.Context, startKey kv.Key, cols []*Column, fn RecordIterFunc) error
 
 	// RowWithCols returns a row that contains the given cols.
-	RowWithCols(ctx sessionctx.Context, h int64, cols []*Column) ([]types.Datum, error)
+	// RowWithCols(ctx sessionctx.Context, h int64, cols []*Column) ([]types.Datum, error)
 
 	// Row returns a row for all columns.
 	Row(ctx sessionctx.Context, h int64) ([]types.Datum, error)
@@ -138,9 +137,6 @@ type Table interface {
 	// AllocAutoID allocates an auto_increment ID for a new row.
 	AllocAutoID(ctx sessionctx.Context) (int64, error)
 
-	// Allocator returns Allocator.
-	Allocator(ctx sessionctx.Context) autoid.Allocator
-
 	// RebaseAutoID rebases the auto_increment ID base.
 	// If allocIDs is true, it will allocate some IDs and save to the cache.
 	// If allocIDs is false, it will not allocate IDs.
@@ -171,13 +167,6 @@ type PartitionedTable interface {
 	GetPartition(physicalID int64) PhysicalTable
 	GetPartitionByRow(sessionctx.Context, []types.Datum) (Table, error)
 }
-
-// TableFromMeta builds a table.Table from *model.TableInfo.
-// Currently, it is assigned to tables.TableFromMeta in tidb package's init function.
-var TableFromMeta func(alloc autoid.Allocator, tblInfo *model.TableInfo) (Table, error)
-
-// MockTableFromMeta only serves for test.
-var MockTableFromMeta func(tableInfo *model.TableInfo) Table
 
 // Table error codes.
 const (

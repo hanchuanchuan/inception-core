@@ -24,7 +24,6 @@ import (
 	"github.com/hanchuanchuan/inception-core/ast"
 	"github.com/hanchuanchuan/inception-core/config"
 	"github.com/hanchuanchuan/inception-core/kv"
-	"github.com/hanchuanchuan/inception-core/meta/autoid"
 	"github.com/hanchuanchuan/inception-core/mysql"
 	"github.com/hanchuanchuan/inception-core/sessionctx/stmtctx"
 	"github.com/hanchuanchuan/inception-core/terror"
@@ -281,7 +280,7 @@ type SessionVars struct {
 
 	// IDAllocator is provided by kvEncoder, if it is provided, we will use it to alloc auto id instead of using
 	// Table.alloc.
-	IDAllocator autoid.Allocator
+	// IDAllocator autoid.Allocator
 
 	// OptimizerSelectivityLevel defines the level of the selectivity estimation in plan.
 	OptimizerSelectivityLevel int

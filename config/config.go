@@ -28,11 +28,6 @@ import (
 	"github.com/pingcap/errors"
 )
 
-// Config number limitations
-const (
-	MaxLogFileSize = 4096 // MB
-)
-
 // Valid config maps
 var (
 	ValidStorage = map[string]bool{
@@ -65,19 +60,16 @@ type Config struct {
 	// TODO: We actually only support mode 2, which keeps the original case, but the comparison is case-insensitive.
 	LowerCaseTableNames int `toml:"lower-case-table-names" json:"lower-case-table-names"`
 
-	Log                 Log               `toml:"log" json:"log"`
-	Security            Security          `toml:"security" json:"security"`
-	Status              Status            `toml:"status" json:"status"`
-	Performance         Performance       `toml:"performance" json:"performance"`
-	PreparedPlanCache   PreparedPlanCache `toml:"prepared-plan-cache" json:"prepared-plan-cache"`
-	ProxyProtocol       ProxyProtocol     `toml:"proxy-protocol" json:"proxy-protocol"`
-	TiKVClient          TiKVClient        `toml:"tikv-client" json:"tikv-client"`
-	Binlog              Binlog            `toml:"binlog" json:"binlog"`
-	Inc                 Inc               `toml:"inc" json:"inc"`
-	Osc                 Osc               `toml:"osc" json:"osc"`
-	Ghost               Ghost             `toml:"ghost" json:"ghost"`
-	IncLevel            IncLevel          `toml:"inc_level" json:"inc_level"`
-	CompatibleKillQuery bool              `toml:"compatible-kill-query" json:"compatible-kill-query"`
+	Log                 Log        `toml:"log" json:"log"`
+	Security            Security   `toml:"security" json:"security"`
+	Status              Status     `toml:"status" json:"status"`
+	TiKVClient          TiKVClient `toml:"tikv-client" json:"tikv-client"`
+	Binlog              Binlog     `toml:"binlog" json:"binlog"`
+	Inc                 Inc        `toml:"inc" json:"inc"`
+	Osc                 Osc        `toml:"osc" json:"osc"`
+	Ghost               Ghost      `toml:"ghost" json:"ghost"`
+	IncLevel            IncLevel   `toml:"inc_level" json:"inc_level"`
+	CompatibleKillQuery bool       `toml:"compatible-kill-query" json:"compatible-kill-query"`
 
 	// 是否跳过用户权限校验
 	SkipGrantTable bool `toml:"skip_grant_table" json:"skip_grant_table"`
@@ -156,20 +148,6 @@ type Status struct {
 	StatusPort   uint `toml:"status-port" json:"status-port"`
 }
 
-// Performance is the performance section of the config.
-type Performance struct {
-	MaxProcs            uint    `toml:"max-procs" json:"max-procs"`
-	TCPKeepAlive        bool    `toml:"tcp-keep-alive" json:"tcp-keep-alive"`
-	CrossJoin           bool    `toml:"cross-join" json:"cross-join"`
-	StatsLease          string  `toml:"stats-lease" json:"stats-lease"`
-	RunAutoAnalyze      bool    `toml:"run-auto-analyze" json:"run-auto-analyze"`
-	StmtCountLimit      uint    `toml:"stmt-count-limit" json:"stmt-count-limit"`
-	FeedbackProbability float64 `toml:"feedback-probability" json:"feedback-probability"`
-	QueryFeedbackLimit  uint    `toml:"query-feedback-limit" json:"query-feedback-limit"`
-	PseudoEstimateRatio float64 `toml:"pseudo-estimate-ratio" json:"pseudo-estimate-ratio"`
-	ForcePriority       string  `toml:"force-priority" json:"force-priority"`
-}
-
 // PlanCache is the PlanCache section of the config.
 type PlanCache struct {
 	Enabled  bool `toml:"enabled" json:"enabled"`
@@ -181,22 +159,6 @@ type PlanCache struct {
 type TxnLocalLatches struct {
 	Enabled  bool `toml:"enabled" json:"enabled"`
 	Capacity uint `toml:"capacity" json:"capacity"`
-}
-
-// PreparedPlanCache is the PreparedPlanCache section of the config.
-type PreparedPlanCache struct {
-	Enabled  bool `toml:"enabled" json:"enabled"`
-	Capacity uint `toml:"capacity" json:"capacity"`
-}
-
-// ProxyProtocol is the PROXY protocol section of the config.
-type ProxyProtocol struct {
-	// PROXY protocol acceptable client networks.
-	// Empty string means disable PROXY protocol,
-	// * means all networks.
-	Networks string `toml:"networks" json:"networks"`
-	// PROXY protocol header read timeout, Unit is second.
-	HeaderTimeout uint `toml:"header-timeout" json:"header-timeout"`
 }
 
 // TiKVClient is the config for tikv client.
@@ -668,28 +630,6 @@ var defaultConf = Config{
 	Status: Status{
 		ReportStatus: false,
 		StatusPort:   10080,
-	},
-	Performance: Performance{
-		TCPKeepAlive: false,
-		CrossJoin:    true,
-		// 设置0s时关闭统计信息更新
-		StatsLease:     "0s",
-		RunAutoAnalyze: false,
-		StmtCountLimit: 5000,
-		// 统计直方图采样率,为0时不作采样
-		FeedbackProbability: 0.0,
-		// 内存最大采样数
-		QueryFeedbackLimit:  0,
-		PseudoEstimateRatio: 0.8,
-		ForcePriority:       "NO_PRIORITY",
-	},
-	ProxyProtocol: ProxyProtocol{
-		Networks:      "",
-		HeaderTimeout: 5,
-	},
-	PreparedPlanCache: PreparedPlanCache{
-		Enabled:  false,
-		Capacity: 100,
 	},
 	TiKVClient: TiKVClient{
 		GrpcConnectionCount:  16,

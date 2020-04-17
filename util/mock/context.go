@@ -23,12 +23,10 @@ import (
 	"github.com/hanchuanchuan/inception-core/kv"
 	"github.com/hanchuanchuan/inception-core/sessionctx"
 	"github.com/hanchuanchuan/inception-core/sessionctx/variable"
-	"github.com/hanchuanchuan/inception-core/types"
 	"github.com/hanchuanchuan/inception-core/util"
 	"github.com/hanchuanchuan/inception-core/util/kvcache"
 	"github.com/hanchuanchuan/inception-core/util/sqlexec"
 	"github.com/pingcap/errors"
-	binlog "github.com/pingcap/tipb/go-binlog"
 	"golang.org/x/net/context"
 )
 
@@ -199,23 +197,6 @@ func (c *Context) GoCtx() context.Context {
 // StoreQueryFeedback stores the query feedback.
 func (c *Context) StoreQueryFeedback(_ interface{}) {}
 
-// StmtCommit implements the sessionctx.Context interface.
-func (c *Context) StmtCommit() {
-}
-
-// StmtRollback implements the sessionctx.Context interface.
-func (c *Context) StmtRollback() {
-}
-
-// StmtGetMutation implements the sessionctx.Context interface.
-func (c *Context) StmtGetMutation(tableID int64) *binlog.TableMutation {
-	return nil
-}
-
-// StmtAddDirtyTableOP implements the sessionctx.Context interface.
-func (c *Context) StmtAddDirtyTableOP(op int, tid int64, handle int64, row []types.Datum) {
-}
-
 // NewContext creates a new mocked sessionctx.Context.
 func NewContext() *Context {
 	ctx, cancel := context.WithCancel(context.Background())
@@ -230,7 +211,3 @@ func NewContext() *Context {
 	sctx.sessionVars.GlobalVarsAccessor = variable.NewMockGlobalAccessor()
 	return sctx
 }
-
-// HookKeyForTest is as alias, used by context.WithValue.
-// golint forbits using string type as key in context.WithValue.
-type HookKeyForTest string

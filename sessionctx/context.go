@@ -18,9 +18,7 @@ import (
 
 	"github.com/hanchuanchuan/inception-core/kv"
 	"github.com/hanchuanchuan/inception-core/sessionctx/variable"
-	"github.com/hanchuanchuan/inception-core/types"
 	"github.com/hanchuanchuan/inception-core/util"
-	binlog "github.com/pingcap/tipb/go-binlog"
 	"golang.org/x/net/context"
 )
 
@@ -35,7 +33,7 @@ type Context interface {
 	Txn() kv.Transaction
 
 	// GetClient gets a kv.Client.
-	GetClient() kv.Client
+	// GetClient() kv.Client
 
 	// SetValue saves a value associated with this context for key.
 	SetValue(key fmt.Stringer, value interface{})
@@ -44,7 +42,7 @@ type Context interface {
 	Value(key fmt.Stringer) interface{}
 
 	// ClearValue clears the value associated with this context for key.
-	ClearValue(key fmt.Stringer)
+	// ClearValue(key fmt.Stringer)
 
 	GetSessionVars() *variable.SessionVars
 
@@ -57,14 +55,14 @@ type Context interface {
 
 	// ActivePendingTxn receives the pending transaction from the transaction channel.
 	// It should be called right before we builds an executor.
-	ActivePendingTxn() error
+	// ActivePendingTxn() error
 
 	// InitTxnWithStartTS initializes a transaction with startTS.
 	// It should be called right before we builds an executor.
-	InitTxnWithStartTS(startTS uint64) error
+	// InitTxnWithStartTS(startTS uint64) error
 
 	// GetStore returns the store of session.
-	GetStore() kv.Storage
+	// GetStore() kv.Storage
 
 	// PreparedPlanCache returns the cache of the physical plan
 	// PreparedPlanCache() *kvcache.SimpleLRUCache
@@ -73,13 +71,13 @@ type Context interface {
 	// StoreQueryFeedback(feedback interface{})
 
 	// StmtCommit flush all changes by the statement to the underlying transaction.
-	StmtCommit()
+	// StmtCommit()
 	// StmtRollback provides statement level rollback.
-	StmtRollback()
+	// StmtRollback()
 	// StmtGetMutation gets the binlog mutation for current statement.
-	StmtGetMutation(int64) *binlog.TableMutation
+	// StmtGetMutation(int64) *binlog.TableMutation
 	// StmtAddDirtyTableOP adds the dirty table operation for current statement.
-	StmtAddDirtyTableOP(op int, tid int64, handle int64, row []types.Datum)
+	// StmtAddDirtyTableOP(op int, tid int64, handle int64, row []types.Datum)
 }
 
 type basicCtxType int

@@ -46,13 +46,15 @@ const (
 )
 
 var (
-	StageList  = [4]string{"RERUN", "CHECKED", "EXECUTED", "BACKUP"}
+	// StageList 审核各阶段,可选值: 审核阶段,执行阶段,备份阶段
+	StageList = [4]string{"RERUN", "CHECKED", "EXECUTED", "BACKUP"}
+	// StatusList 状态列表. 如审核完成,执行成功/失败,备份成功/失败等
 	StatusList = [5]string{"Audit Completed", "Execute failed", "Execute Successfully",
 		"Execute Successfully\nBackup failed", "Execute Successfully\nBackup Successfully"}
 )
 
 // int类型map(用以数值列类型变更审核)
-var IntegerOrderedMaps = map[string]int{
+var integerOrderedMaps = map[string]int{
 	"bit":       1,
 	"tinyint":   2,
 	"smallint":  3,
@@ -62,7 +64,7 @@ var IntegerOrderedMaps = map[string]int{
 }
 
 // int类型map(用以数值列类型变更审核)
-var IntegerOrderedMaps2 = map[byte]int{
+var integerOrderedMaps2 = map[byte]int{
 	mysql.TypeBit:      1,
 	mysql.TypeTiny:     2,
 	mysql.TypeShort:    3,

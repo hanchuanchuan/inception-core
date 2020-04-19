@@ -3577,8 +3577,8 @@ func (s *session) checkModifyColumn(t *TableInfo, c *ast.AlterTableSpec) {
 				newType := GetDataTypeBase(fieldType)
 
 				// 判断如果是int8 >> int16 >> int32等转换,则忽略
-				oldTypeIndex, ok1 := IntegerOrderedMaps[GetDataTypeBase(foundField.Type)]
-				newTypeIndex, ok2 := IntegerOrderedMaps2[nc.Tp.Tp]
+				oldTypeIndex, ok1 := integerOrderedMaps[GetDataTypeBase(foundField.Type)]
+				newTypeIndex, ok2 := integerOrderedMaps2[nc.Tp.Tp]
 				if ok1 && ok2 {
 					if newTypeIndex < oldTypeIndex {
 						s.appendErrorNo(ER_CHANGE_COLUMN_TYPE,

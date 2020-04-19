@@ -62,7 +62,8 @@ func (s *session) makeNewResult() ([]Record, error) {
 	return records, nil
 }
 
-func NewInception() *session {
+// NewInception 返回审核服务会话
+func NewInception() Session {
 	se := &session{
 		parser:              parser.New(),
 		sessionVars:         variable.NewSessionVars(),
@@ -73,7 +74,6 @@ func NewInception() *session {
 	se.sessionVars.GlobalVarsAccessor = se
 
 	tz := timeutil.InferSystemTZ()
-	// log.Errorf("tz: %v", tz)
 	timeutil.SetSystemTZ(tz)
 
 	return se
@@ -105,7 +105,7 @@ func (s *session) init() {
 	s.parseIncLevel()
 
 	// 操作前重设上下文
-	s.ResetContextOfStmt()
+	s.resetContextOfStmt()
 }
 
 // clear 清理变量或map等信息
@@ -347,25 +347,25 @@ func (s *session) audit(ctx context.Context, sql string) (err error) {
 
 			for i, stmtNode := range stmtNodes {
 				//  是ASCII码160的特殊空格
-				currentSql := strings.Trim(stmtNode.Text(), " ;\t\n\v\f\r ")
+				currentSQL := strings.Trim(stmtNode.Text(), " ;\t\n\v\f\r ")
 
 				s.myRecord = &Record{
-					Sql:   currentSql,
+					Sql:   currentSQL,
 					Buf:   new(bytes.Buffer),
 					Type:  stmtNode,
 					Stage: StageCheck,
 				}
 
-				s.SetMyProcessInfo(currentSql, time.Now(), float64(i)/float64(lineCount+1))
+				s.SetMyProcessInfo(currentSQL, time.Now(), float64(i)/float64(lineCount+1))
 
 				var result []sqlexec.RecordSet
 				var err error
 				if s.opt != nil && s.opt.Print {
-					result, err = s.printCommand(ctx, stmtNode, currentSql)
+					result, err = s.printCommand(ctx, stmtNode, currentSQL)
 				} else if s.opt != nil && s.opt.split {
-					result, err = s.splitCommand(ctx, stmtNode, currentSql)
+					result, err = s.splitCommand(ctx, stmtNode, currentSQL)
 				} else {
-					result, err = s.processCommand(ctx, stmtNode, currentSql)
+					result, err = s.processCommand(ctx, stmtNode, currentSQL)
 				}
 				if err != nil {
 					return err
@@ -395,7 +395,7 @@ func (s *session) audit(ctx context.Context, sql string) (err error) {
 				} else {
 					// 远程操作时隐藏本地的set命令
 					if _, ok := stmtNode.(*ast.InceptionSetStmt); ok && s.myRecord.ErrLevel == 0 {
-						log.Info(currentSql)
+						log.Info(currentSQL)
 					} else {
 						s.recordSets.Append(s.myRecord)
 					}

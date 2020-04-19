@@ -106,7 +106,7 @@ type MultiQueryNoDelayResult interface {
 	// WarnCount return warn count for one statement in multi-queries.
 	WarnCount() uint16
 	// Status return status when executing one statement in multi-queries.
-	Status() uint16
+	// Status() uint16
 	// LastInsertID return last insert id for one statement in multi-queries.
-	LastInsertID() uint64
+	// LastInsertID() uint64
 }

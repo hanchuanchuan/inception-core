@@ -52,31 +52,18 @@ import (
 // Session context
 type Session interface {
 	sessionctx.Context
-	Status() uint16                                                  // Flag of current status, such as autocommit.
-	LastInsertID() uint64                                            // LastInsertID is the last inserted auto_increment ID.
 	AffectedRows() uint64                                            // Affected rows by latest executed stmt.
 	Execute(context.Context, string) ([]sqlexec.RecordSet, error)    // Execute a sql statement.
 	ExecuteInc(context.Context, string) ([]sqlexec.RecordSet, error) // Execute a sql statement.
-	// String() string                                                  // String is used to debug.
-	// RollbackTxn(context.Context) error
-	// PrepareStmt executes prepare statement in binary protocol.
-	// PrepareStmt(sql string) (stmtID uint32, paramCount int, fields []*ast.ResultField, err error)
-	// ExecutePreparedStmt executes a prepared statement.
-	// ExecutePreparedStmt(ctx context.Context, stmtID uint32, param ...interface{}) (sqlexec.RecordSet, error)
-	// DropPreparedStmt(stmtID uint32) error
-	// SetClientCapability(uint32) // Set client capability flags.
+
 	SetConnectionID(uint64)
 	SetProcessInfo(string, time.Time, byte)
-	// SetTLSState(*tls.ConnectionState)
+
 	SetCollation(coID int) error
 	SetSessionManager(util.SessionManager)
-	// Close()
+
 	Auth(user *auth.UserIdentity, auth []byte, salt []byte) bool
 	ShowProcess() util.ProcessInfo
-	// PrePareTxnCtx is exported for test.
-	// PrepareTxnCtx(context.Context)
-	// FieldList returns fields list of a table.
-	// FieldList(tableName string) (fields []*ast.ResultField, err error)
 
 	// 用以测试
 	GetAlterTablePostPart(sql string, isPtOSC bool) string
@@ -209,17 +196,6 @@ type session struct {
 	lowerCaseTableNames int
 	// PXC集群节点
 	isClusterNode bool
-}
-
-func (s *session) Status() uint16 {
-	return s.sessionVars.Status
-}
-
-func (s *session) LastInsertID() uint64 {
-	if s.sessionVars.LastInsertID > 0 {
-		return s.sessionVars.LastInsertID
-	}
-	return s.sessionVars.InsertID
 }
 
 func (s *session) AffectedRows() uint64 {
@@ -415,7 +391,7 @@ func (s *session) SetProcessInfo(sql string, t time.Time, command byte) {
 		DB:        s.sessionVars.CurrentDB,
 		Command:   "LOCAL",
 		Time:      t,
-		State:     s.Status(),
+		State:     s.sessionVars.Status,
 		Info:      sql,
 		OperState: "INIT",
 	}
@@ -615,9 +591,9 @@ func logQuery(query string, vars *variable.SessionVars) {
 	}
 }
 
-// ResetContextOfStmt resets the StmtContext and session variables.
+// resetContextOfStmt resets the StmtContext and session variables.
 // Before every execution, we must clear statement context.
-func (s *session) ResetContextOfStmt() (err error) {
+func (s *session) resetContextOfStmt() (err error) {
 	vars := s.GetSessionVars()
 	sc := new(stmtctx.StatementContext)
 	sc.TimeZone = vars.Location()

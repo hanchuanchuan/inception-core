@@ -30,6 +30,7 @@ import (
 	"golang.org/x/net/context"
 )
 
+// Record 审核/执行记录.
 type Record struct {
 	// 阶段   RERUN EXECUTED CHECKED
 	Stage byte
@@ -733,7 +734,7 @@ func (s *SplitSets) Append(sql string, errmsg string) {
 
 // id累加
 func (s *SplitSets) Increment() {
-	s.id += 1
+	s.id++
 }
 
 // CurrentId 当前ID

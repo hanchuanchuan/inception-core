@@ -15,7 +15,9 @@ func main() {
 		User:     "test",
 		Password: "test",
 	})
-	sql := `use test_inc;
+	sql := `
+	inception set lang='zh-cn';
+	use test_inc;
 	drop table if exists t1;
 	create table t1(id int primary key);
 	insert into t1 values(1);`

@@ -191,7 +191,7 @@ func (s *session) addNewSplitNode() {
 		s.splitSets.Append(sql, "")
 	}
 
-	s.splitSets.id += 1
+	s.splitSets.id++
 	s.splitSets.tableList = make(map[string]bool)
 	s.splitSets.ddlflag = 0
 	s.splitSets.sqlBuf = new(bytes.Buffer)

@@ -536,8 +536,8 @@ func (s *session) write(b []byte, binEvent *replication.BinlogEvent) {
 	// 此处执行状态不确定的记录
 	if s.myRecord.StageStatus == StatusExecFail {
 		log.Info("auto fix record:", s.myRecord.OPID)
-		s.myRecord.AffectedRows += 1
-		s.totalChangeRows += 1
+		s.myRecord.AffectedRows++
+		s.totalChangeRows++
 	}
 	s.ch <- &chanData{sql: b, e: binEvent, opid: s.myRecord.OPID,
 		table: s.lastBackupTable, record: s.myRecord}

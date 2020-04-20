@@ -1195,57 +1195,57 @@ func (s *session) sqlStatisticsIncrement(record *Record) {
 
 	switch node := record.Type.(type) {
 	case *ast.InsertStmt:
-		s.statistics.insert += 1
+		s.statistics.insert++
 	case *ast.DeleteStmt:
-		s.statistics.deleting += 1
+		s.statistics.deleting++
 	case *ast.UpdateStmt:
-		s.statistics.update += 1
+		s.statistics.update++
 
 	case *ast.UseStmt:
-		s.statistics.usedb += 1
+		s.statistics.usedb++
 
 	case *ast.CreateDatabaseStmt:
-		s.statistics.createdb += 1
+		s.statistics.createdb++
 
 	// case *ast.DropDatabaseStmt:
-	// 	s.statistics.dropdb += 1
+	// 	s.statistics.dropdb++
 
 	case *ast.CreateTableStmt:
-		s.statistics.createtable += 1
+		s.statistics.createtable++
 	case *ast.AlterTableStmt:
-		s.statistics.altertable += 1
+		s.statistics.altertable++
 
 		for _, alter := range node.Specs {
 			switch alter.Tp {
 			case ast.AlterTableOption:
-				s.statistics.alteroption += 1
+				s.statistics.alteroption++
 			case ast.AlterTableAddColumns:
-				s.statistics.addcolumn += 1
+				s.statistics.addcolumn++
 			case ast.AlterTableDropColumn:
-				s.statistics.dropcolumn += 1
+				s.statistics.dropcolumn++
 
 			case ast.AlterTableAddConstraint:
-				s.statistics.createindex += 1
+				s.statistics.createindex++
 			case ast.AlterTableDropPrimaryKey, ast.AlterTableDropIndex:
-				s.statistics.dropindex += 1
+				s.statistics.dropindex++
 
 			// case ast.AlterTableDropForeignKey:
 
 			case ast.AlterTableModifyColumn, ast.AlterTableChangeColumn:
-				s.statistics.changecolumn += 1
+				s.statistics.changecolumn++
 
 			case ast.AlterTableRenameTable:
-				s.statistics.rename += 1
+				s.statistics.rename++
 
 			case ast.AlterTableAlterColumn:
 				for _, nc := range alter.NewColumns {
 					// if nc.Options != nil {
-					// 	s.statistics.changedefault += 1
+					// 	s.statistics.changedefault++
 					// }
 					if nc.Tp != nil {
 						if nc.Tp.Charset != "" || nc.Tp.Collate != "" {
 							if nc.Tp.Charset != "binary" {
-								s.statistics.alterconvert += 1
+								s.statistics.alterconvert++
 							}
 						}
 					}
@@ -1254,25 +1254,25 @@ func (s *session) sqlStatisticsIncrement(record *Record) {
 			case ast.AlterTableLock,
 				ast.AlterTableAlgorithm,
 				ast.AlterTableForce:
-				s.statistics.alteroption += 1
+				s.statistics.alteroption++
 			}
 
 		}
 
 	case *ast.DropTableStmt:
-		s.statistics.droptable += 1
+		s.statistics.droptable++
 	case *ast.RenameTableStmt:
-		s.statistics.rename += 1
+		s.statistics.rename++
 	case *ast.TruncateTableStmt:
-		s.statistics.truncate += 1
+		s.statistics.truncate++
 
 	case *ast.CreateIndexStmt:
-		s.statistics.createindex += 1
+		s.statistics.createindex++
 	case *ast.DropIndexStmt:
-		s.statistics.dropindex += 1
+		s.statistics.dropindex++
 
 	case *ast.SelectStmt:
-		s.statistics.selects += 1
+		s.statistics.selects++
 
 	}
 }
@@ -2567,7 +2567,7 @@ func (s *session) checkCreateTable(node *ast.CreateTableStmt, sql string) {
 					timestampColCount := 0
 					for _, field := range node.Cols {
 						if field.Tp.Tp == mysql.TypeTimestamp {
-							timestampColCount += 1
+							timestampColCount++
 							if timestampColCount == 1 {
 								hasNotNullFlag := false
 								hasDefault := false
@@ -2646,13 +2646,13 @@ func (s *session) checkCreateTable(node *ast.CreateTableStmt, sql string) {
 							if op.Tp == ast.ColumnOptionDefaultValue {
 								if f, ok := op.Expr.(*ast.FuncCallExpr); ok {
 									if f.FnName.L == ast.CurrentTimestamp {
-										currentTimestampCount += 1
+										currentTimestampCount++
 									}
 								}
 							} else if op.Tp == ast.ColumnOptionOnUpdate {
 								if f, ok := op.Expr.(*ast.FuncCallExpr); ok {
 									if f.FnName.L == ast.CurrentTimestamp {
-										onUpdateTimestampCount += 1
+										onUpdateTimestampCount++
 									}
 								} else {
 
@@ -2666,13 +2666,13 @@ func (s *session) checkCreateTable(node *ast.CreateTableStmt, sql string) {
 							if op.Tp == ast.ColumnOptionDefaultValue {
 								if f, ok := op.Expr.(*ast.FuncCallExpr); ok {
 									if f.FnName.L == ast.CurrentTimestamp {
-										currentDatetimeCount += 1
+										currentDatetimeCount++
 									}
 								}
 							} else if op.Tp == ast.ColumnOptionOnUpdate {
 								if f, ok := op.Expr.(*ast.FuncCallExpr); ok {
 									if f.FnName.L == ast.CurrentTimestamp {
-										onUpdateDatetimeCount += 1
+										onUpdateDatetimeCount++
 									}
 								}
 							}
@@ -2935,7 +2935,7 @@ func (s *session) checkAlterTable(node *ast.AlterTableStmt, sql string) {
 		return
 	}
 
-	table.AlterCount += 1
+	table.AlterCount++
 
 	if table.AlterCount > 1 {
 		s.appendErrorNo(ER_ALTER_TABLE_ONCE, node.Table.Name.O)
@@ -4125,7 +4125,7 @@ func (s *session) checkAddColumn(t *TableInfo, c *ast.AlterTableSpec) {
 					key_count := 0
 					for _, row := range rows {
 						if row.Seq == 1 && !row.IsDeleted {
-							key_count += 1
+							key_count++
 						}
 					}
 					if s.inc.MaxKeys > 0 && key_count >= int(s.inc.MaxKeys) {
@@ -4459,7 +4459,7 @@ func (s *session) checkCreateIndex(table *ast.TableName, IndexName string,
 	key_count := 0
 	for _, row := range rows {
 		if row.Seq == 1 && !row.IsDeleted {
-			key_count += 1
+			key_count++
 		}
 	}
 
@@ -4642,7 +4642,7 @@ func (s *session) checkInsert(node *ast.InsertStmt, sql string) {
 		// fieldCount = len(table.Fields)
 		for _, field := range table.Fields {
 			if !field.IsDeleted {
-				fieldCount += 1
+				fieldCount++
 			}
 		}
 	}
@@ -4901,7 +4901,7 @@ func (s *session) subSelectColumns(node ast.ResultSetNode) (int, error) {
 				// totalFieldCount += len(t.Fields)
 				for _, field := range t.Fields {
 					if !field.IsDeleted {
-						totalFieldCount += 1
+						totalFieldCount++
 					}
 				}
 			} else {
@@ -4912,7 +4912,7 @@ func (s *session) subSelectColumns(node ast.ResultSetNode) (int, error) {
 		selectColumnCount := 0
 		for _, f := range sel.Fields.Fields {
 			if f.WildCard == nil {
-				selectColumnCount += 1
+				selectColumnCount++
 			} else {
 				db := f.WildCard.Schema.L
 				wildTable := f.WildCard.Table.L
@@ -4939,7 +4939,7 @@ func (s *session) subSelectColumns(node ast.ResultSetNode) (int, error) {
 									// selectColumnCount += len(t.Fields)
 									for _, field := range t.Fields {
 										if !field.IsDeleted {
-											selectColumnCount += 1
+											selectColumnCount++
 										}
 									}
 								}

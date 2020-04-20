@@ -243,3 +243,15 @@ golint:
 	fi
 	@revive -formatter friendly -config .revive.toml ./...
 	@printf '%s\n' '$(OK)'
+
+.PHONY: release
+release:
+	@echo "$(CGREEN)Cross platform building for release ...$(CEND)"
+	@mkdir -p release
+	@for GOOS in darwin linux; do \
+		for GOARCH in amd64; do \
+			echo "Building $${GOOS}-$${GOARCH} ..."; \
+			GOOS=$${GOOS} GOARCH=amd64 $(GOBUILD) -ldflags '-s -w $(LDFLAGS)'  -o bin/inception cmd/main.go; \
+			tar -czf release/inception-$${GOOS}-amd64-${VERSION}.tar.gz bin/inception; \
+		done ;\
+	done

@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"fmt"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/hanchuanchuan/inception-core/ast"
@@ -34,8 +35,9 @@ import (
 	"github.com/pingcap/errors"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
-	// "vitess.io/vitess/go/vt/sqlparser"
 )
+
+var baseConnID uint64
 
 func (s *session) makeNewResult() ([]Record, error) {
 	// if s.opt != nil && s.opt.Print && s.printSets != nil {
@@ -64,19 +66,21 @@ func (s *session) makeNewResult() ([]Record, error) {
 
 // NewInception 返回审核服务会话
 func NewInception() Session {
-	se := &session{
+	s := &session{
 		parser:              parser.New(),
 		sessionVars:         variable.NewSessionVars(),
 		lowerCaseTableNames: 1,
 		isAPI:               true,
 	}
 
-	se.sessionVars.GlobalVarsAccessor = se
+	s.sessionVars.GlobalVarsAccessor = s
+
+	s.sessionVars.ConnectionID = atomic.AddUint64(&baseConnID, 1)
 
 	tz := timeutil.InferSystemTZ()
 	timeutil.SetSystemTZ(tz)
 
-	return se
+	return s
 }
 
 // init 初始化map

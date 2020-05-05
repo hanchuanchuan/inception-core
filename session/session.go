@@ -52,8 +52,8 @@ import (
 // Session context
 type Session interface {
 	sessionctx.Context
-	AffectedRows() uint64                                            // Affected rows by latest executed stmt.
-	Execute(context.Context, string) ([]sqlexec.RecordSet, error)    // Execute a sql statement.
+	AffectedRows() uint64 // Affected rows by latest executed stmt.
+	// Execute(context.Context, string) ([]sqlexec.RecordSet, error)    // Execute a sql statement.
 	ExecuteInc(context.Context, string) ([]sqlexec.RecordSet, error) // Execute a sql statement.
 
 	SetConnectionID(uint64)

@@ -17,7 +17,6 @@ import (
 	"bytes"
 	"fmt"
 	"sort"
-	"sync/atomic"
 
 	// "github.com/hanchuanchuan/inception-core/ast"
 	"github.com/hanchuanchuan/inception-core/kv"
@@ -113,105 +112,61 @@ func NewTestKit(c *check.C, store kv.Storage) *TestKit {
 	}
 }
 
-// NewTestKitWithInit returns a new *TestKit and creates a session.
-func NewTestKitWithInit(c *check.C, store kv.Storage) *TestKit {
-	tk := NewTestKit(c, store)
-	// Use test and prepare a session.
-	tk.MustExec("use test")
-	return tk
-}
-
-// NewTestKitWithInit returns a new *TestKit and creates a session.
-func NewTestKitWithInitINC(c *check.C, store kv.Storage) *TestKit {
-	tk := NewTestKit(c, store)
-	// Use test and prepare a session.
-	// tk.MustExec("use test")
-	return tk
-}
-
 var connectionID uint64
 
-// Exec executes a sql statement.
-func (tk *TestKit) Exec(sql string, args ...interface{}) (sqlexec.RecordSet, error) {
-	var err error
-	if tk.Se == nil {
-		tk.Se, err = session.CreateSession4Test(tk.store)
-		tk.c.Assert(err, check.IsNil)
-		id := atomic.AddUint64(&connectionID, 1)
-		tk.Se.SetConnectionID(id)
-	}
-	ctx := context.Background()
-	if len(args) == 0 {
-		var rss []sqlexec.RecordSet
-		rss, err = tk.Se.Execute(ctx, sql)
-		if err == nil && len(rss) > 0 {
-			return rss[0], nil
-		}
-		return nil, errors.Trace(err)
-	}
+// // Exec executes a sql statement.
+// func (tk *TestKit) Exec(sql string, args ...interface{}) (sqlexec.RecordSet, error) {
+// 	var err error
+// 	if tk.Se == nil {
+// 		tk.Se, err = session.CreateSession4Test(tk.store)
+// 		tk.c.Assert(err, check.IsNil)
+// 		id := atomic.AddUint64(&connectionID, 1)
+// 		tk.Se.SetConnectionID(id)
+// 	}
+// 	ctx := context.Background()
+// 	if len(args) == 0 {
+// 		var rss []sqlexec.RecordSet
+// 		rss, err = tk.Se.Execute(ctx, sql)
+// 		if err == nil && len(rss) > 0 {
+// 			return rss[0], nil
+// 		}
+// 		return nil, errors.Trace(err)
+// 	}
 
-	var rss []sqlexec.RecordSet
-	rss, err = tk.Se.Execute(ctx, fmt.Sprintf(sql, args...))
-	if err == nil && len(rss) > 0 {
-		return rss[0], nil
-	}
-	return nil, errors.Trace(err)
+// 	var rss []sqlexec.RecordSet
+// 	rss, err = tk.Se.Execute(ctx, fmt.Sprintf(sql, args...))
+// 	if err == nil && len(rss) > 0 {
+// 		return rss[0], nil
+// 	}
+// 	return nil, errors.Trace(err)
+// }
 
-	// stmtID, _, _, err := tk.Se.PrepareStmt(sql)
-	// if err != nil {
-	// 	return nil, errors.Trace(err)
-	// }
-	// rs, err := tk.Se.ExecutePreparedStmt(ctx, stmtID, args...)
-	// if err != nil {
-	// 	return nil, errors.Trace(err)
-	// }
-	// err = tk.Se.DropPreparedStmt(stmtID)
-	// if err != nil {
-	// 	return nil, errors.Trace(err)
-	// }
-	// return rs, nil
-}
+// // Exec executes a sql statement.
+// func (tk *TestKit) ExecInc(sql string, args ...interface{}) (sqlexec.RecordSet, error) {
+// 	var err error
+// 	if tk.Se == nil {
+// 		tk.Se, err = session.CreateSession4Test(tk.store)
+// 		tk.c.Assert(err, check.IsNil)
+// 		id := atomic.AddUint64(&connectionID, 1)
+// 		tk.Se.SetConnectionID(id)
+// 	}
+// 	ctx := context.Background()
+// 	if len(args) == 0 {
+// 		var rss []sqlexec.RecordSet
+// 		rss, err = tk.Se.ExecuteInc(ctx, sql)
+// 		if err == nil && len(rss) > 0 {
+// 			return rss[0], nil
+// 		}
+// 		return nil, errors.Trace(err)
+// 	}
 
-// Exec executes a sql statement.
-func (tk *TestKit) ExecInc(sql string, args ...interface{}) (sqlexec.RecordSet, error) {
-	var err error
-	if tk.Se == nil {
-		tk.Se, err = session.CreateSession4Test(tk.store)
-		tk.c.Assert(err, check.IsNil)
-		id := atomic.AddUint64(&connectionID, 1)
-		tk.Se.SetConnectionID(id)
-	}
-	ctx := context.Background()
-	if len(args) == 0 {
-		var rss []sqlexec.RecordSet
-		rss, err = tk.Se.ExecuteInc(ctx, sql)
-		if err == nil && len(rss) > 0 {
-			return rss[0], nil
-		}
-		return nil, errors.Trace(err)
-	}
-
-	var rss []sqlexec.RecordSet
-	rss, err = tk.Se.Execute(ctx, fmt.Sprintf(sql, args...))
-	if err == nil && len(rss) > 0 {
-		return rss[0], nil
-	}
-	return nil, errors.Trace(err)
-
-	// stmtID, _, _, err := tk.Se.PrepareStmt(sql)
-	// if err != nil {
-	// 	return nil, errors.Trace(err)
-	// }
-	// rs, err := tk.Se.ExecutePreparedStmt(ctx, stmtID, args...)
-	// if err != nil {
-	// 	return nil, errors.Trace(err)
-	// }
-	// err = tk.Se.DropPreparedStmt(stmtID)
-	// if err != nil {
-	// 	return nil, errors.Trace(err)
-	// }
-	// return rs, nil
-}
+// 	var rss []sqlexec.RecordSet
+// 	rss, err = tk.Se.Execute(ctx, fmt.Sprintf(sql, args...))
+// 	if err == nil && len(rss) > 0 {
+// 		return rss[0], nil
+// 	}
+// 	return nil, errors.Trace(err)
+// }
 
 // CheckExecResult checks the affected rows and the insert id after executing MustExec.
 func (tk *TestKit) CheckExecResult(affectedRows, insertID int64) {
@@ -219,43 +174,43 @@ func (tk *TestKit) CheckExecResult(affectedRows, insertID int64) {
 	// tk.c.Assert(insertID, check.Equals, int64(tk.Se.LastInsertID()))
 }
 
-// MustExec executes a sql statement and asserts nil error.
-func (tk *TestKit) MustExec(sql string, args ...interface{}) {
-	res, err := tk.Exec(sql, args...)
-	tk.c.Assert(err, check.IsNil, check.Commentf("sql:%s, %v, error stack %v", sql, args, errors.ErrorStack(err)))
-	if res != nil {
-		tk.c.Assert(res.Close(), check.IsNil)
-	}
-}
+// // MustExec executes a sql statement and asserts nil error.
+// func (tk *TestKit) MustExec(sql string, args ...interface{}) {
+// 	res, err := tk.Exec(sql, args...)
+// 	tk.c.Assert(err, check.IsNil, check.Commentf("sql:%s, %v, error stack %v", sql, args, errors.ErrorStack(err)))
+// 	if res != nil {
+// 		tk.c.Assert(res.Close(), check.IsNil)
+// 	}
+// }
 
-// MustExec executes a sql statement and asserts nil error.
-func (tk *TestKit) MustExecInc(sql string, args ...interface{}) {
-	res, err := tk.ExecInc(sql, args...)
-	tk.c.Assert(err, check.IsNil, check.Commentf("sql:%s, %v, error stack %v", sql, args, errors.ErrorStack(err)))
-	if res != nil {
-		tk.c.Assert(res.Close(), check.IsNil)
-	}
-}
+// // MustExec executes a sql statement and asserts nil error.
+// func (tk *TestKit) MustExecInc(sql string, args ...interface{}) {
+// 	res, err := tk.ExecInc(sql, args...)
+// 	tk.c.Assert(err, check.IsNil, check.Commentf("sql:%s, %v, error stack %v", sql, args, errors.ErrorStack(err)))
+// 	if res != nil {
+// 		tk.c.Assert(res.Close(), check.IsNil)
+// 	}
+// }
 
-// MustQuery query the statements and returns result rows.
-// If expected result is set it asserts the query result equals expected result.
-func (tk *TestKit) MustQuery(sql string, args ...interface{}) *Result {
-	comment := check.Commentf("sql:%s, args:%v", sql, args)
-	rs, err := tk.Exec(sql, args...)
-	tk.c.Assert(errors.ErrorStack(err), check.Equals, "", comment)
-	tk.c.Assert(rs, check.NotNil, comment)
-	return tk.ResultSetToResult(rs, comment)
-}
+// // MustQuery query the statements and returns result rows.
+// // If expected result is set it asserts the query result equals expected result.
+// func (tk *TestKit) MustQuery(sql string, args ...interface{}) *Result {
+// 	comment := check.Commentf("sql:%s, args:%v", sql, args)
+// 	rs, err := tk.Exec(sql, args...)
+// 	tk.c.Assert(errors.ErrorStack(err), check.Equals, "", comment)
+// 	tk.c.Assert(rs, check.NotNil, comment)
+// 	return tk.ResultSetToResult(rs, comment)
+// }
 
-// MustQuery query the statements and returns result rows.
-// If expected result is set it asserts the query result equals expected result.
-func (tk *TestKit) MustQueryInc(sql string, args ...interface{}) *Result {
-	comment := check.Commentf("sql:%s, args:%v", sql, args)
-	rs, err := tk.ExecInc(sql, args...)
-	tk.c.Assert(errors.ErrorStack(err), check.Equals, "", comment)
-	tk.c.Assert(rs, check.NotNil, comment)
-	return tk.ResultSetToResult(rs, comment)
-}
+// // MustQuery query the statements and returns result rows.
+// // If expected result is set it asserts the query result equals expected result.
+// func (tk *TestKit) MustQueryInc(sql string, args ...interface{}) *Result {
+// 	comment := check.Commentf("sql:%s, args:%v", sql, args)
+// 	rs, err := tk.ExecInc(sql, args...)
+// 	tk.c.Assert(errors.ErrorStack(err), check.Equals, "", comment)
+// 	tk.c.Assert(rs, check.NotNil, comment)
+// 	return tk.ResultSetToResult(rs, comment)
+// }
 
 // ResultSetToResult converts sqlexec.RecordSet to testkit.Result.
 // It is used to check results of execute statement in binary mode.

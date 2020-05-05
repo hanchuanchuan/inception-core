@@ -14,7 +14,6 @@
 package session_test
 
 import (
-	"fmt"
 	"strconv"
 
 	// "strings"
@@ -45,9 +44,6 @@ func (s *testSessionSplitSuite) SetUpSuite(c *C) {
 	config.GetGlobalConfig().Inc.EnableFingerprint = true
 	config.GetGlobalConfig().Inc.SqlSafeUpdates = 0
 
-	if s.tk == nil {
-		s.tk = testkit.NewTestKitWithInit(c, s.store)
-	}
 }
 
 func (s *testSessionSplitSuite) TearDownSuite(c *C) {
@@ -55,51 +51,42 @@ func (s *testSessionSplitSuite) TearDownSuite(c *C) {
 }
 
 func (s *testSessionSplitSuite) makeSQL(sql string) *testkit.Result {
-	a := `/*--user=test;--password=test;--host=127.0.0.1;--split=1;--port=3306;--enable-ignore-warnings;*/
-inception_magic_start;
-use test_inc;
-%s;
-inception_magic_commit;`
-	return s.tk.MustQueryInc(fmt.Sprintf(a, sql))
+
+	s.sessionService.LoadOptions(session.SourceOptions{
+		Host:           s.defaultInc.BackupHost,
+		Port:           int(s.defaultInc.BackupPort),
+		User:           s.defaultInc.BackupUser,
+		Password:       s.defaultInc.BackupPassword,
+		RealRowCount:   s.realRowCount,
+		IgnoreWarnings: true,
+	})
+	result, _ := s.sessionService.Split(context.Background(), s.useDB+sql)
+	s.rows = make([][]interface{}, len(result))
+	for index, row := range result {
+		s.rows[index] = row.List()
+	}
+	return nil
+
+	// 	a := `/*--user=test;--password=test;--host=127.0.0.1;--split=1;--port=3306;--enable-ignore-warnings;*/
+	// inception_magic_start;
+	// use test_inc;
+	// %s;
+	// inception_magic_commit;`
+	// 	return s.tk.MustQueryInc(fmt.Sprintf(a, sql))
 }
 
-func (s *testSessionSplitSuite) TestBegin(c *C) {
-	sql := `/*--user=test;--password=test;--host=127.0.0.1;--split=1;--port=3306;--enable-ignore-warnings;*/
-use test_inc;
-create table t1(id int);`
-	// res := s.tk.MustQueryInc(sql)
-	s.tk.MustQueryInc(sql)
+// func (s *testSessionSplitSuite) TestWrongStmt(c *C) {
+// 	sql := `/*--user=test;--password=test;--host=127.0.0.1;--split=1;--port=3306;--enable-ignore-warnings;*/
+// inception_magic_start;
+// 123;
+// inception_magic_commit;`
+// 	res := s.tk.MustQueryInc(sql)
 
-	c.Assert(int(s.tk.Se.AffectedRows()), Equals, 1)
-	// 没有开始语法,无法返回split格式结果
-	// row := res.Rows()[s.tk.Se.AffectedRows()-1]
-	// c.Assert(row[3], Equals, "Must end with commit.")
-}
-
-func (s *testSessionSplitSuite) TestEnd(c *C) {
-	sql := `/*--user=test;--password=test;--host=127.0.0.1;--split=1;--port=3306;--enable-ignore-warnings;*/
-inception_magic_start;
-use test_inc;
-create table t1(id int);`
-	res := s.tk.MustQueryInc(sql)
-
-	c.Assert(len(res.Rows()), Equals, 2, Commentf("%v", res.Rows()))
-	row := res.Rows()[len(res.Rows())-1]
-	c.Assert(row[3], Equals, "Must end with commit.")
-}
-
-func (s *testSessionSplitSuite) TestWrongStmt(c *C) {
-	sql := `/*--user=test;--password=test;--host=127.0.0.1;--split=1;--port=3306;--enable-ignore-warnings;*/
-inception_magic_start;
-123;
-inception_magic_commit;`
-	res := s.tk.MustQueryInc(sql)
-
-	c.Assert(int(s.tk.Se.AffectedRows()), Equals, 1)
-	row := res.Rows()[s.tk.Se.AffectedRows()-1]
-	// c.Assert(row[3], Equals, "line 1 column 3 near \"\" (total length 3)")
-	c.Assert(row[3], Equals, "You have an error in your SQL syntax, near '123' at line 1")
-}
+// 	c.Assert(int(s.tk.Se.AffectedRows()), Equals, 1)
+// 	row := s.rows[s.tk.Se.AffectedRows()-1]
+// 	// c.Assert(row[3], Equals, "line 1 column 3 near \"\" (total length 3)")
+// 	c.Assert(row[3], Equals, "You have an error in your SQL syntax, near '123' at line 1")
+// }
 
 func (s *testSessionSplitSuite) TestInsert(c *C) {
 
@@ -181,17 +168,13 @@ func (s *testSessionSplitSuite) testRows(c *C, sql string, count int) {
 		return
 	}
 
-	if s.tk == nil {
-		s.tk = testkit.NewTestKitWithInit(c, s.store)
-	}
+	s.makeSQL(sql)
+	c.Assert(len(s.rows), Equals, count, Commentf("%v", s.rows))
+	c.Assert(int(s.tk.Se.AffectedRows()), Equals, count, Commentf("%v", s.rows))
 
-	res := s.makeSQL(sql)
-	c.Assert(len(res.Rows()), Equals, count, Commentf("%v", res.Rows()))
-	c.Assert(int(s.tk.Se.AffectedRows()), Equals, count, Commentf("%v", res.Rows()))
-
-	for _, row := range res.Rows() {
+	for _, row := range s.rows {
 		c.Assert(row[3], Equals, "<nil>", Commentf("%v", row))
 	}
 
-	s.rows = res.Rows()
+	s.rows = s.rows
 }

@@ -21,9 +21,7 @@ import (
 
 	"github.com/hanchuanchuan/inception-core/config"
 	"github.com/hanchuanchuan/inception-core/session"
-	"github.com/hanchuanchuan/inception-core/util/testkit"
 	. "github.com/pingcap/check"
-	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 )
 
@@ -71,10 +69,6 @@ func (s *testSessionIncExecSuite) testErrorCode(c *C, sql string, errors ...*ses
 		})
 		s.testExecuteResult(c, sql, errors...)
 		return nil
-	}
-
-	if s.tk == nil {
-		s.tk = testkit.NewTestKitWithInit(c, s.store)
 	}
 
 	session.CheckAuditSetting(config.GetGlobalConfig())
@@ -670,26 +664,26 @@ func (s *testSessionIncExecSuite) TestAlterTableDropIndex(c *C) {
 	s.testErrorCode(c, sql)
 }
 
-func (s *testSessionIncExecSuite) TestShowVariables(c *C) {
-	sql := ""
-	sql = "inception show variables;"
-	s.tk.MustQueryInc(sql)
-	c.Assert(s.tk.Se.AffectedRows(), GreaterEqual, uint64(102))
+// func (s *testSessionIncExecSuite) TestShowVariables(c *C) {
+// 	sql := ""
+// 	sql = "inception show variables;"
+// 	s.tk.MustQueryInc(sql)
+// 	c.Assert(s.tk.Se.AffectedRows(), GreaterEqual, uint64(102))
 
-	sql = "inception get variables;"
-	s.tk.MustQueryInc(sql)
-	c.Assert(s.tk.Se.AffectedRows(), GreaterEqual, uint64(102))
+// 	sql = "inception get variables;"
+// 	s.tk.MustQueryInc(sql)
+// 	c.Assert(s.tk.Se.AffectedRows(), GreaterEqual, uint64(102))
 
-	sql = "inception show variables like 'backup_password';"
-	res := s.tk.MustQueryInc(sql)
+// 	sql = "inception show variables like 'backup_password';"
+// 	res := s.tk.MustQueryInc(sql)
 
-	log.Errorf("s.tk.Se.AffectedRows():%v, len(res.Rows()):%v", s.tk.Se.AffectedRows(), len(res.Rows()))
+// 	log.Errorf("s.tk.Se.AffectedRows():%v, len(res.Rows()):%v", s.tk.Se.AffectedRows(), len(res.Rows()))
 
-	row := res.Rows()[s.tk.Se.AffectedRows()-1]
-	if row[1].(string) != "" {
-		c.Assert(row[1].(string)[:1], Equals, "*")
-	}
-}
+// 	row := res.Rows()[s.tk.Se.AffectedRows()-1]
+// 	if row[1].(string) != "" {
+// 		c.Assert(row[1].(string)[:1], Equals, "*")
+// 	}
+// }
 
 // 无法审核，原因是需要自己做SetSessionManager
 // func (s *testSessionIncExecSuite) TestShowProcesslist(c *C) {
@@ -710,42 +704,42 @@ func (s *testSessionIncExecSuite) TestShowVariables(c *C) {
 // 	}
 // }
 
-func (s *testSessionIncExecSuite) TestSetVariables(c *C) {
-	sql := ""
-	sql = "inception show variables;"
-	s.tk.MustQueryInc(sql)
-	c.Assert(s.tk.Se.AffectedRows(), GreaterEqual, uint64(102))
+// func (s *testSessionIncExecSuite) TestSetVariables(c *C) {
+// 	sql := ""
+// 	sql = "inception show variables;"
+// 	s.tk.MustQueryInc(sql)
+// 	c.Assert(s.tk.Se.AffectedRows(), GreaterEqual, uint64(102))
 
-	// 不区分session和global.所有会话全都global级别
-	s.tk.MustExecInc("inception set global max_keys = 20;")
-	s.tk.MustExecInc("inception set session max_keys = 10;")
-	result := s.tk.MustQueryInc("inception show variables like 'max_keys';")
-	result.Check(testkit.Rows("max_keys 10"))
+// 	// 不区分session和global.所有会话全都global级别
+// 	s.tk.MustExecInc("inception set global max_keys = 20;")
+// 	s.tk.MustExecInc("inception set session max_keys = 10;")
+// 	result := s.tk.MustQueryInc("inception show variables like 'max_keys';")
+// 	result.Check(testkit.Rows("max_keys 10"))
 
-	s.tk.MustExecInc("inception set ghost_default_retries = 70;")
-	result = s.tk.MustQueryInc("inception show variables like 'ghost_default_retries';")
-	result.Check(testkit.Rows("ghost_default_retries 70"))
+// 	s.tk.MustExecInc("inception set ghost_default_retries = 70;")
+// 	result = s.tk.MustQueryInc("inception show variables like 'ghost_default_retries';")
+// 	result.Check(testkit.Rows("ghost_default_retries 70"))
 
-	s.tk.MustExecInc("inception set osc_max_thread_running = 100;")
-	result = s.tk.MustQueryInc("inception show variables like 'osc_max_thread_running';")
-	result.Check(testkit.Rows("osc_max_thread_running 100"))
+// 	s.tk.MustExecInc("inception set osc_max_thread_running = 100;")
+// 	result = s.tk.MustQueryInc("inception show variables like 'osc_max_thread_running';")
+// 	result.Check(testkit.Rows("osc_max_thread_running 100"))
 
-	// 无效参数
-	res, err := s.tk.ExecInc("inception set osc_max_thread_running1 = 100;")
-	c.Assert(err, NotNil)
-	c.Assert(err.Error(), Equals, "无效参数")
-	if res != nil {
-		c.Assert(res.Close(), IsNil)
-	}
+// 	// 无效参数
+// 	res, err := s.tk.ExecInc("inception set osc_max_thread_running1 = 100;")
+// 	c.Assert(err, NotNil)
+// 	c.Assert(err.Error(), Equals, "无效参数")
+// 	if res != nil {
+// 		c.Assert(res.Close(), IsNil)
+// 	}
 
-	// 无效参数
-	res, err = s.tk.ExecInc("inception set osc_max_thread_running = 'abc';")
-	c.Assert(err, NotNil)
-	c.Assert(err.Error(), Equals, "[variable:1232]Incorrect argument type to variable 'osc_max_thread_running'")
-	if res != nil {
-		c.Assert(res.Close(), IsNil)
-	}
-}
+// 	// 无效参数
+// 	res, err = s.tk.ExecInc("inception set osc_max_thread_running = 'abc';")
+// 	c.Assert(err, NotNil)
+// 	c.Assert(err.Error(), Equals, "[variable:1232]Incorrect argument type to variable 'osc_max_thread_running'")
+// 	if res != nil {
+// 		c.Assert(res.Close(), IsNil)
+// 	}
+// }
 
 func (s *testSessionIncExecSuite) TestAlterTable(c *C) {
 

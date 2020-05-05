@@ -635,6 +635,20 @@ func NewPrintSets() *PrintSets {
 	return t
 }
 
+func (r *PrintRecord) List() []interface{} {
+
+	columns := make([]interface{}, 5)
+
+	columns[0] = r.ID
+
+	columns[1] = r.SQL
+	columns[2] = int64(r.ErrLevel)
+	columns[3] = r.QueryTree
+	columns[4] = r.ErrorMessage
+
+	return columns
+}
+
 func (s *PrintSets) Append(errLevel int64, sql, tree, errmsg string) {
 	row := make([]types.Datum, s.rc.fieldCount)
 
@@ -730,6 +744,18 @@ func (s *SplitSets) Append(sql string, errmsg string) {
 
 	s.rc.data = append(s.rc.data, row)
 	s.rc.count++
+}
+
+func (r *SplitRecord) List() []interface{} {
+
+	columns := make([]interface{}, 4)
+
+	columns[0] = r.ID
+	columns[1] = r.SQL
+	columns[2] = r.IsDDL
+	columns[3] = r.ErrorMessage
+
+	return columns
 }
 
 // id累加

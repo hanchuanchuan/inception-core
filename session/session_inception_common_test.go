@@ -112,8 +112,6 @@ func (s *testCommon) initSetUp(c *C) {
 
 	// server.InitOscProcessList()
 
-	// s.session = s.tk.Se
-
 	cfg := config.GetGlobalConfig()
 	_, localFile, _, _ := runtime.Caller(0)
 	localFile = path.Dir(localFile)
@@ -147,6 +145,7 @@ func (s *testCommon) initSetUp(c *C) {
 
 	// 测试API接口时自动忽略之前的测试方法
 	s.isAPI = isAPI
+	s.isAPI = true
 	s.sessionService = session.NewInception()
 	s.sessionService.LoadOptions(session.SourceOptions{
 		Host:         inc.BackupHost,
@@ -155,11 +154,6 @@ func (s *testCommon) initSetUp(c *C) {
 		Password:     inc.BackupPassword,
 		RealRowCount: s.realRowCount,
 	})
-
-	if s.tk == nil {
-		s.tk = testkit.NewTestKitWithInit(c, s.store)
-	}
-
 }
 
 func (s *testCommon) tearDownSuite(c *C) {
@@ -177,11 +171,6 @@ func (s *testCommon) tearDownTest(c *C) {
 	if testing.Short() {
 		c.Skip("skipping test; in TRAVIS mode")
 	}
-
-	if s.tk == nil {
-		s.tk = testkit.NewTestKitWithInit(c, s.store)
-	}
-
 	saved := config.GetGlobalConfig().Inc
 	defer func() {
 		config.GetGlobalConfig().Inc = saved
@@ -206,7 +195,6 @@ func (s *testCommon) tearDownTest(c *C) {
 			continue
 		}
 		n := strings.Replace(name, "'", "", -1)
-		// res := s.tk.MustQueryInc(fmt.Sprintf(exec, s.getAddr(), s.useDB, "drop table `"+n+"`"))
 
 		s.mustRunExec(c, "drop table `"+n+"`")
 		// log.Info(res.Rows())
@@ -224,298 +212,193 @@ func (s *testCommon) tearDownTest(c *C) {
 func (s *testCommon) runCheck(sql string) {
 	session.CheckAuditSetting(config.GetGlobalConfig())
 
-	if s.isAPI {
-		s.sessionService.LoadOptions(session.SourceOptions{
-			Host:           s.defaultInc.BackupHost,
-			Port:           int(s.defaultInc.BackupPort),
-			User:           s.defaultInc.BackupUser,
-			Password:       s.defaultInc.BackupPassword,
-			RealRowCount:   s.realRowCount,
-			IgnoreWarnings: true,
-		})
-		result, _ := s.sessionService.Audit(context.Background(), s.useDB+sql)
-		s.records = result
-		s.rows = make([][]interface{}, len(result))
-		for index, row := range result {
-			// c.Assert(row.ErrLevel, Not(Equals), uint8(2), Commentf("%v", result))
-			s.rows[index] = row.List()
-		}
-		return
+	s.sessionService.LoadOptions(session.SourceOptions{
+		Host:           s.defaultInc.BackupHost,
+		Port:           int(s.defaultInc.BackupPort),
+		User:           s.defaultInc.BackupUser,
+		Password:       s.defaultInc.BackupPassword,
+		RealRowCount:   s.realRowCount,
+		IgnoreWarnings: true,
+	})
+	result, _ := s.sessionService.Audit(context.Background(), s.useDB+sql)
+	s.records = result
+	s.rows = make([][]interface{}, len(result))
+	for index, row := range result {
+		// c.Assert(row.ErrLevel, Not(Equals), uint8(2), Commentf("%v", result))
+		s.rows[index] = row.List()
 	}
-
-	a := `/*%s;--check=1;--backup=0;--enable-ignore-warnings;real_row_count=%v;*/
-inception_magic_start;
-%s
-%s;
-inception_magic_commit;`
-	res := s.tk.MustQueryInc(fmt.Sprintf(a, s.getAddr(), s.realRowCount, s.useDB, sql))
-	s.rows = res.Rows()
-	return
 }
 
 func (s *testCommon) mustCheck(c *C, sql string) *testkit.Result {
 
-	if s.isAPI {
-		s.sessionService.LoadOptions(session.SourceOptions{
-			Host:         s.defaultInc.BackupHost,
-			Port:         int(s.defaultInc.BackupPort),
-			User:         s.defaultInc.BackupUser,
-			Password:     s.defaultInc.BackupPassword,
-			RealRowCount: s.realRowCount,
-		})
-		result, err := s.sessionService.Audit(context.Background(), s.useDB+sql)
-		c.Assert(err, IsNil)
-		s.records = result
-		s.rows = make([][]interface{}, len(result))
-		for index, row := range result {
-			c.Assert(row.ErrLevel, Not(Equals), uint8(2), Commentf("%v", result))
-			s.rows[index] = row.List()
-		}
-		return nil
+	s.sessionService.LoadOptions(session.SourceOptions{
+		Host:         s.defaultInc.BackupHost,
+		Port:         int(s.defaultInc.BackupPort),
+		User:         s.defaultInc.BackupUser,
+		Password:     s.defaultInc.BackupPassword,
+		RealRowCount: s.realRowCount,
+	})
+	result, err := s.sessionService.Audit(context.Background(), s.useDB+sql)
+	c.Assert(err, IsNil)
+	s.records = result
+	s.rows = make([][]interface{}, len(result))
+	for index, row := range result {
+		c.Assert(row.ErrLevel, Not(Equals), uint8(2), Commentf("%v", result))
+		s.rows[index] = row.List()
 	}
-
-	a := `/*%s;--check=1;--backup=0;--enable-ignore-warnings;real_row_count=%v;*/
-inception_magic_start;
-%s
-%s;
-inception_magic_commit;`
-	res := s.tk.MustQueryInc(fmt.Sprintf(a, s.getAddr(), s.realRowCount, s.useDB, sql))
-	for _, row := range res.Rows() {
-		c.Assert(row[2], Not(Equals), "2", Commentf("%v", row))
-	}
-	s.rows = res.Rows()
-	return res
+	return nil
 }
 
 func (s *testCommon) runExec(sql string) *testkit.Result {
-	if s.isAPI {
-		s.sessionService.LoadOptions(session.SourceOptions{
-			Host:           s.defaultInc.BackupHost,
-			Port:           int(s.defaultInc.BackupPort),
-			User:           s.defaultInc.BackupUser,
-			Password:       s.defaultInc.BackupPassword,
-			RealRowCount:   s.realRowCount,
-			IgnoreWarnings: true,
-		})
-		result, _ := s.sessionService.RunExecute(context.Background(), s.useDB+sql)
-		s.records = result
-		s.rows = make([][]interface{}, len(result))
-		for index, row := range result {
-			// c.Assert(row.ErrLevel, Not(Equals), uint8(2), Commentf("%v", result))
-			s.rows[index] = row.List()
-		}
-		return nil
-	}
 
-	a := `/*%s;--execute=1;--backup=0;--enable-ignore-warnings;real_row_count=%v;*/
-inception_magic_start;
-%s
-%s;
-inception_magic_commit;`
-	res := s.tk.MustQueryInc(fmt.Sprintf(a, s.getAddr(), s.realRowCount, s.useDB, sql))
-	s.rows = res.Rows()
-	return res
+	s.sessionService.LoadOptions(session.SourceOptions{
+		Host:           s.defaultInc.BackupHost,
+		Port:           int(s.defaultInc.BackupPort),
+		User:           s.defaultInc.BackupUser,
+		Password:       s.defaultInc.BackupPassword,
+		RealRowCount:   s.realRowCount,
+		IgnoreWarnings: true,
+	})
+	result, _ := s.sessionService.RunExecute(context.Background(), s.useDB+sql)
+	s.records = result
+	s.rows = make([][]interface{}, len(result))
+	for index, row := range result {
+		// c.Assert(row.ErrLevel, Not(Equals), uint8(2), Commentf("%v", result))
+		s.rows[index] = row.List()
+	}
+	return nil
 }
 
 func (s *testCommon) mustRunExec(c *C, sql string) *testkit.Result {
 	config.GetGlobalConfig().Inc.EnableDropTable = true
 	session.CheckAuditSetting(config.GetGlobalConfig())
 
-	if s.isAPI {
-		s.sessionService.LoadOptions(session.SourceOptions{
-			Host:           s.defaultInc.BackupHost,
-			Port:           int(s.defaultInc.BackupPort),
-			User:           s.defaultInc.BackupUser,
-			Password:       s.defaultInc.BackupPassword,
-			RealRowCount:   s.realRowCount,
-			IgnoreWarnings: true,
-		})
-		result, err := s.sessionService.RunExecute(context.Background(), s.useDB+sql)
-		c.Assert(err, IsNil)
-		s.records = result
-		s.rows = make([][]interface{}, len(result))
-		for index, row := range result {
-			c.Assert(row.ErrLevel, Not(Equals), uint8(2), Commentf("%v", result))
-			s.rows[index] = row.List()
-		}
-		return nil
+	s.sessionService.LoadOptions(session.SourceOptions{
+		Host:           s.defaultInc.BackupHost,
+		Port:           int(s.defaultInc.BackupPort),
+		User:           s.defaultInc.BackupUser,
+		Password:       s.defaultInc.BackupPassword,
+		RealRowCount:   s.realRowCount,
+		IgnoreWarnings: true,
+	})
+	result, err := s.sessionService.RunExecute(context.Background(), s.useDB+sql)
+	c.Assert(err, IsNil)
+	s.records = result
+	s.rows = make([][]interface{}, len(result))
+	for index, row := range result {
+		c.Assert(row.ErrLevel, Not(Equals), uint8(2), Commentf("%v", result))
+		s.rows[index] = row.List()
 	}
-
-	a := `/*%s;--execute=1;--backup=0;--enable-ignore-warnings;real_row_count=%v;*/
-inception_magic_start;
-%s
-%s;
-inception_magic_commit;`
-	res := s.tk.MustQueryInc(fmt.Sprintf(a, s.getAddr(), s.realRowCount, s.useDB, sql))
-
-	for _, row := range res.Rows() {
-		c.Assert(strings.Contains(row[3].(string), "Execute Successfully"),
-			Equals, true, Commentf("%v", res.Rows()))
-		c.Assert(row[2], Not(Equals), "2", Commentf("%v", row))
-	}
-
-	s.rows = res.Rows()
-	return res
+	return nil
 }
 
 func (s *testCommon) runBackup(sql string) *testkit.Result {
-	if s.isAPI {
-		s.sessionService.LoadOptions(session.SourceOptions{
-			Host:           s.defaultInc.BackupHost,
-			Port:           int(s.defaultInc.BackupPort),
-			User:           s.defaultInc.BackupUser,
-			Password:       s.defaultInc.BackupPassword,
-			RealRowCount:   s.realRowCount,
-			Backup:         true,
-			IgnoreWarnings: true,
-		})
-		result, _ := s.sessionService.RunExecute(context.Background(), s.useDB+sql)
-		s.records = result
-		s.rows = make([][]interface{}, len(result))
-		for index, row := range result {
-			// c.Assert(row.ErrLevel, Not(Equals), uint8(2), Commentf("%v", result))
-			s.rows[index] = row.List()
-		}
-		return nil
-	}
 
-	a := `/*%s;--execute=1;--backup=1;--enable-ignore-warnings;real_row_count=%v;*/
-inception_magic_start;
-%s
-%s;
-inception_magic_commit;`
-	res := s.tk.MustQueryInc(fmt.Sprintf(a, s.getAddr(), s.realRowCount, s.useDB, sql))
-	s.rows = res.Rows()
-	return res
+	s.sessionService.LoadOptions(session.SourceOptions{
+		Host:           s.defaultInc.BackupHost,
+		Port:           int(s.defaultInc.BackupPort),
+		User:           s.defaultInc.BackupUser,
+		Password:       s.defaultInc.BackupPassword,
+		RealRowCount:   s.realRowCount,
+		Backup:         true,
+		IgnoreWarnings: true,
+	})
+	result, _ := s.sessionService.RunExecute(context.Background(), s.useDB+sql)
+	s.records = result
+	s.rows = make([][]interface{}, len(result))
+	for index, row := range result {
+		// c.Assert(row.ErrLevel, Not(Equals), uint8(2), Commentf("%v", result))
+		s.rows[index] = row.List()
+	}
+	return nil
 }
 
 func (s *testCommon) mustRunBackup(c *C, sql string) *testkit.Result {
 
-	if s.isAPI {
-		s.sessionService.LoadOptions(session.SourceOptions{
-			Host:           s.defaultInc.BackupHost,
-			Port:           int(s.defaultInc.BackupPort),
-			User:           s.defaultInc.BackupUser,
-			Password:       s.defaultInc.BackupPassword,
-			RealRowCount:   s.realRowCount,
-			Backup:         true,
-			IgnoreWarnings: true,
-		})
-		result, err := s.sessionService.RunExecute(context.Background(), s.useDB+sql)
-		c.Assert(err, IsNil)
-		s.records = result
-		s.rows = make([][]interface{}, len(result))
-		for index, row := range result {
-			c.Assert(row.ErrLevel, Not(Equals), uint8(2), Commentf("%v", result))
-			s.rows[index] = row.List()
-		}
-		return nil
+	s.sessionService.LoadOptions(session.SourceOptions{
+		Host:           s.defaultInc.BackupHost,
+		Port:           int(s.defaultInc.BackupPort),
+		User:           s.defaultInc.BackupUser,
+		Password:       s.defaultInc.BackupPassword,
+		RealRowCount:   s.realRowCount,
+		Backup:         true,
+		IgnoreWarnings: true,
+	})
+	result, err := s.sessionService.RunExecute(context.Background(), s.useDB+sql)
+	c.Assert(err, IsNil)
+	s.records = result
+	s.rows = make([][]interface{}, len(result))
+	for index, row := range result {
+		c.Assert(row.ErrLevel, Not(Equals), uint8(2), Commentf("%v", result))
+		s.rows[index] = row.List()
 	}
-
-	a := `/*%s;--execute=1;--backup=1;--enable-ignore-warnings;real_row_count=%v;*/
-inception_magic_start;
-%s
-%s;
-inception_magic_commit;`
-	res := s.tk.MustQueryInc(fmt.Sprintf(a, s.getAddr(), s.realRowCount, s.useDB, sql))
-
-	// 需要成功执行
-	for _, row := range res.Rows() {
-		// c.Assert(strings.Contains(row[3].(string), "Backup Successfully"),
-		// 	Equals, true, Commentf("%v", res.Rows()))
-		c.Assert(row[2], Not(Equals), "2", Commentf("%v", row))
-	}
-
-	s.rows = res.Rows()
-	return res
+	return nil
 }
 
 func (s *testCommon) mustRunBackupTran(c *C, sql string) *testkit.Result {
-	if s.isAPI {
-		s.sessionService.LoadOptions(session.SourceOptions{
-			Host:           s.defaultInc.BackupHost,
-			Port:           int(s.defaultInc.BackupPort),
-			User:           s.defaultInc.BackupUser,
-			Password:       s.defaultInc.BackupPassword,
-			RealRowCount:   s.realRowCount,
-			Backup:         true,
-			IgnoreWarnings: true,
-			TranBatch:      3,
-		})
-		result, err := s.sessionService.RunExecute(context.Background(), s.useDB+sql)
-		c.Assert(err, IsNil)
-		s.records = result
-		s.rows = make([][]interface{}, len(result))
-		for index, row := range result {
-			c.Assert(row.ErrLevel, Not(Equals), uint8(2), Commentf("%v", result))
-			s.rows[index] = row.List()
-		}
-		return nil
+
+	s.sessionService.LoadOptions(session.SourceOptions{
+		Host:           s.defaultInc.BackupHost,
+		Port:           int(s.defaultInc.BackupPort),
+		User:           s.defaultInc.BackupUser,
+		Password:       s.defaultInc.BackupPassword,
+		RealRowCount:   s.realRowCount,
+		Backup:         true,
+		IgnoreWarnings: true,
+		TranBatch:      3,
+	})
+	result, err := s.sessionService.RunExecute(context.Background(), s.useDB+sql)
+	c.Assert(err, IsNil)
+	s.records = result
+	s.rows = make([][]interface{}, len(result))
+	for index, row := range result {
+		c.Assert(row.ErrLevel, Not(Equals), uint8(2), Commentf("%v", result))
+		s.rows[index] = row.List()
 	}
-
-	a := `/*%s;--execute=1;--backup=1;--enable-ignore-warnings;real_row_count=%v;--trans=3;*/
-inception_magic_start;
-%s
-%s;
-inception_magic_commit;`
-	res := s.tk.MustQueryInc(fmt.Sprintf(a, s.getAddr(), s.realRowCount, s.useDB, sql))
-
-	// 需要成功执行
-	for _, row := range res.Rows() {
-		c.Assert(row[2], Not(Equals), "2", Commentf("%v", row))
-	}
-
-	s.rows = res.Rows()
-	return res
+	return nil
 }
 
 func (s *testCommon) runTranSQL(sql string, batch int) *testkit.Result {
-	if s.isAPI {
-		s.sessionService.LoadOptions(session.SourceOptions{
-			Host:           s.defaultInc.BackupHost,
-			Port:           int(s.defaultInc.BackupPort),
-			User:           s.defaultInc.BackupUser,
-			Password:       s.defaultInc.BackupPassword,
-			RealRowCount:   s.realRowCount,
-			Backup:         true,
-			IgnoreWarnings: true,
-			TranBatch:      batch,
-		})
-		result, _ := s.sessionService.RunExecute(context.Background(), s.useDB+sql)
-		s.records = result
-		s.rows = make([][]interface{}, len(result))
-		for index, row := range result {
-			s.rows[index] = row.List()
-		}
-		return nil
+
+	s.sessionService.LoadOptions(session.SourceOptions{
+		Host:           s.defaultInc.BackupHost,
+		Port:           int(s.defaultInc.BackupPort),
+		User:           s.defaultInc.BackupUser,
+		Password:       s.defaultInc.BackupPassword,
+		RealRowCount:   s.realRowCount,
+		Backup:         true,
+		IgnoreWarnings: true,
+		TranBatch:      batch,
+	})
+	result, _ := s.sessionService.RunExecute(context.Background(), s.useDB+sql)
+	s.records = result
+	s.rows = make([][]interface{}, len(result))
+	for index, row := range result {
+		s.rows[index] = row.List()
 	}
-
-	a := `/*%s;--execute=1;--backup=1;--execute=1;--enable-ignore-warnings;real_row_count=%v;--trans=%d;*/
-inception_magic_start;
-%s
-%s;
-inception_magic_commit;`
-	res := s.tk.MustQueryInc(fmt.Sprintf(a, s.getAddr(), s.realRowCount, batch, s.useDB, sql))
-
-	s.rows = res.Rows()
-	return res
+	return nil
 }
 
 func (s *testCommon) mustrunTranSQL(c *C, sql string) *testkit.Result {
-	a := `/*%s;--execute=1;--backup=1;--execute=1;--enable-ignore-warnings;real_row_count=%v;--trans=10;*/
-inception_magic_start;
-%s
-%s;
-inception_magic_commit;`
-	res := s.tk.MustQueryInc(fmt.Sprintf(a, s.getAddr(), s.realRowCount, s.useDB, sql))
 
-	// 需要成功执行
-	for _, row := range res.Rows() {
-		c.Assert(row[2], Not(Equals), "2", Commentf("%v", row))
+	s.sessionService.LoadOptions(session.SourceOptions{
+		Host:           s.defaultInc.BackupHost,
+		Port:           int(s.defaultInc.BackupPort),
+		User:           s.defaultInc.BackupUser,
+		Password:       s.defaultInc.BackupPassword,
+		RealRowCount:   s.realRowCount,
+		Backup:         true,
+		IgnoreWarnings: true,
+		TranBatch:      10,
+	})
+	result, _ := s.sessionService.RunExecute(context.Background(), s.useDB+sql)
+	s.records = result
+	s.rows = make([][]interface{}, len(result))
+	for index, row := range result {
+		c.Assert(row.ErrLevel, Not(Equals), uint8(2), Commentf("%v", result))
+		s.rows[index] = row.List()
 	}
-
-	s.rows = res.Rows()
-	return res
+	return nil
 }
 
 func (s *testCommon) getAddr() string {

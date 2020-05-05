@@ -14,7 +14,6 @@
 package session_test
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 	"testing"
@@ -22,7 +21,6 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/hanchuanchuan/inception-core/config"
 	"github.com/hanchuanchuan/inception-core/session"
-	"github.com/hanchuanchuan/inception-core/util/testkit"
 	. "github.com/pingcap/check"
 	"golang.org/x/net/context"
 )
@@ -75,49 +73,14 @@ func (s *testSessionIncSuite) TearDownTest(c *C) {
 
 func (s *testSessionIncSuite) testErrorCode(c *C, sql string, errors ...*session.SQLError) {
 
-	if s.isAPI {
-		s.sessionService.LoadOptions(session.SourceOptions{
-			Host:         s.defaultInc.BackupHost,
-			Port:         int(s.defaultInc.BackupPort),
-			User:         s.defaultInc.BackupUser,
-			Password:     s.defaultInc.BackupPassword,
-			RealRowCount: s.realRowCount,
-		})
-		s.testAuditResult(c, sql, errors...)
-		return
-	}
-
-	if s.tk == nil {
-		s.tk = testkit.NewTestKitWithInit(c, s.store)
-	}
-
-	// session.CheckAuditSetting(config.GetGlobalConfig())
-
-	s.runCheck(sql)
-	row := s.rows[s.getAffectedRows()-1]
-
-	errCode := 0
-	if len(errors) > 0 {
-		for _, e := range errors {
-			level := session.GetErrorLevel(e.Code)
-			if int(level) > errCode {
-				errCode = int(level)
-			}
-		}
-	}
-
-	if errCode > 0 {
-		errMsgs := []string{}
-		for _, e := range errors {
-			errMsgs = append(errMsgs, e.Error())
-		}
-		c.Assert(row[4], Equals, strings.Join(errMsgs, "\n"), Commentf("%v", s.rows))
-	}
-
-	c.Assert(row[2], Equals, strconv.Itoa(errCode), Commentf("%v", row))
-
-	s.rows = s.rows
-
+	s.sessionService.LoadOptions(session.SourceOptions{
+		Host:         s.defaultInc.BackupHost,
+		Port:         int(s.defaultInc.BackupPort),
+		User:         s.defaultInc.BackupUser,
+		Password:     s.defaultInc.BackupPassword,
+		RealRowCount: s.realRowCount,
+	})
+	s.testAuditResult(c, sql, errors...)
 }
 
 func (s *testSessionIncSuite) testAuditResult(c *C, sql string, errors ...*session.SQLError) {
@@ -158,9 +121,6 @@ func (s *testSessionIncSuite) testAuditResult(c *C, sql string, errors ...*sessi
 }
 
 func (s *testSessionIncSuite) testManyErrors(c *C, sql string, errors ...*session.SQLError) {
-	if s.tk == nil {
-		s.tk = testkit.NewTestKitWithInit(c, s.store)
-	}
 
 	s.runCheck(sql)
 
@@ -198,54 +158,6 @@ func (s *testSessionIncSuite) testManyErrors(c *C, sql string, errors ...*sessio
 
 }
 
-func (s *testSessionIncSuite) runAudit(c *C) {
-
-	c.Assert(len(s.audits), Not(Equals), 0)
-
-	var sqls []string
-	for _, a := range s.audits {
-		sqls = append(sqls, a.sql)
-	}
-
-	session.CheckAuditSetting(config.GetGlobalConfig())
-	a := `/*%s;--check=1;--backup=0;--enable-ignore-warnings;real_row_count=%v;*/
-inception_magic_start;
-%s
-%s;
-inception_magic_commit;`
-	res := s.tk.MustQueryInc(fmt.Sprintf(a, s.getAddr(), s.realRowCount, s.useDB,
-		strings.Join(sqls, ";\n"),
-	))
-	s.rows = res.Rows()
-	rows := s.rows
-
-	c.Assert(len(s.audits), Equals, len(rows)-1)
-
-	for index, row := range rows {
-		errors := s.audits[index].errors
-		errCode := 0
-		if len(errors) > 0 {
-			for _, e := range errors {
-				level := session.GetErrorLevel(e.Code)
-				if int(level) > errCode {
-					errCode = int(level)
-				}
-			}
-		}
-
-		if errCode > 0 {
-			errMsgs := []string{}
-			for _, e := range errors {
-				errMsgs = append(errMsgs, e.Error())
-			}
-			c.Assert(row[4], Equals, strings.Join(errMsgs, "\n"), Commentf("%v", rows))
-		}
-		c.Assert(row[2], Equals, strconv.Itoa(errCode), Commentf("%v", row))
-	}
-
-	s.audits = nil
-}
-
 func (s *testCommon) assertAudit(c *C,
 	rows [][]interface{},
 	allErrors ...[]*SQLError) {
@@ -280,67 +192,17 @@ func (s *testCommon) assertAudit(c *C,
 	}
 }
 
-func (s *testSessionIncSuite) TestBegin(c *C) {
-	if testing.Short() {
-		c.Skip("skipping test; in TRAVIS mode")
-	}
+// func (s *testSessionIncSuite) TestWrongDBName(c *C) {
+// 	res := s.tk.MustQueryInc(fmt.Sprintf(`/*%s;--check=1;--backup=0;--ignore-warnings=1;*/
+// 	inception_magic_start;create table t1(id int);inception_magic_commit;`, s.getAddr()))
+// 	s.rows = res.Rows()
+// 	c.Assert(s.getAffectedRows(), Equals, 1)
 
-	res := s.tk.MustQueryInc("create table t1(id int);")
-	s.rows = res.Rows()
-	c.Assert(len(s.rows), Equals, 1, Commentf("%v", s.rows))
-
-	for _, row := range s.rows {
-		c.Assert(row[2], Equals, "2")
-		c.Assert(row[4], Equals, "Must start as begin statement.")
-	}
-}
-
-func (s *testSessionIncSuite) TestNoSourceInfo(c *C) {
-	res := s.tk.MustQueryInc(`inception_magic_start;
-	create table t1(id int);`)
-	s.rows = res.Rows()
-	c.Assert(s.getAffectedRows(), Equals, 1)
-
-	for _, row := range s.rows {
-		c.Assert(row[2], Equals, "2")
-		c.Assert(row[4], Equals, "Invalid source infomation(inception语法格式错误).")
-	}
-}
-
-func (s *testSessionIncSuite) TestNoSourceInfo2(c *C) {
-	res := s.tk.MustQueryInc(`/*--check=1;*/
-	inception_magic_start;create table t1(id int)`)
-	s.rows = res.Rows()
-	c.Assert(s.getAffectedRows(), Equals, 1)
-
-	for _, row := range s.rows {
-		c.Assert(row[2], Equals, "2")
-		c.Assert(row[4], Equals, "Invalid source infomation(主机名为空,端口为0,用户名为空).")
-	}
-}
-
-func (s *testSessionIncSuite) TestWrongDBName(c *C) {
-	res := s.tk.MustQueryInc(fmt.Sprintf(`/*%s;--check=1;--backup=0;--ignore-warnings=1;*/
-	inception_magic_start;create table t1(id int);inception_magic_commit;`, s.getAddr()))
-	s.rows = res.Rows()
-	c.Assert(s.getAffectedRows(), Equals, 1)
-
-	for _, row := range s.rows {
-		c.Assert(row[2], Equals, "2")
-		c.Assert(row[4], Equals, "Incorrect database name ''.")
-	}
-}
-
-func (s *testSessionIncSuite) TestEnd(c *C) {
-	res := s.tk.MustQueryInc(fmt.Sprintf(`/*%s;--check=1;--backup=0;--ignore-warnings=1;*/
-inception_magic_start;use test_inc;create table t1(id int);`, s.getAddr()))
-	s.rows = res.Rows()
-	c.Assert(s.getAffectedRows(), Equals, 3)
-
-	row := s.rows[s.getAffectedRows()-1]
-	c.Assert(row[2], Equals, "2")
-	c.Assert(row[4], Equals, "Must end with commit.")
-}
+// 	for _, row := range s.rows {
+// 		c.Assert(row[2], Equals, "2")
+// 		c.Assert(row[4], Equals, "Incorrect database name ''.")
+// 	}
+// }
 
 func (s *testSessionIncSuite) TestCreateTable(c *C) {
 	sql := ""

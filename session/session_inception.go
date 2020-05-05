@@ -871,11 +871,11 @@ func (s *session) executeAllStatement(ctx context.Context) {
 					trans = nil
 					trans = append(trans, record)
 
-					if s.opt.sleep > 0 && s.opt.sleepRows > 0 {
+					if s.opt.Sleep > 0 && s.opt.sleepRows > 0 {
 						if s.opt.sleepRows == 1 {
-							mysqlSleep(s.opt.sleep)
+							mysqlSleep(s.opt.Sleep)
 						} else if i%s.opt.sleepRows == 0 {
-							mysqlSleep(s.opt.sleep)
+							mysqlSleep(s.opt.Sleep)
 						}
 					}
 				}
@@ -926,11 +926,11 @@ func (s *session) executeAllStatement(ctx context.Context) {
 				// s.executeTransaction(trans)
 				// trans = nil
 
-				if s.opt.sleep > 0 && s.opt.sleepRows > 0 {
+				if s.opt.Sleep > 0 && s.opt.sleepRows > 0 {
 					if s.opt.sleepRows == 1 {
-						mysqlSleep(s.opt.sleep)
+						mysqlSleep(s.opt.Sleep)
 					} else if i%s.opt.sleepRows == 0 {
-						mysqlSleep(s.opt.sleep)
+						mysqlSleep(s.opt.Sleep)
 					}
 				}
 			}
@@ -952,11 +952,11 @@ func (s *session) executeAllStatement(ctx context.Context) {
 			break
 		}
 
-		if s.opt.TranBatch <= 1 && s.opt.sleep > 0 && s.opt.sleepRows > 0 {
+		if s.opt.TranBatch <= 1 && s.opt.Sleep > 0 && s.opt.sleepRows > 0 {
 			if s.opt.sleepRows == 1 {
-				mysqlSleep(s.opt.sleep)
+				mysqlSleep(s.opt.Sleep)
 			} else if i%s.opt.sleepRows == 0 {
-				mysqlSleep(s.opt.sleep)
+				mysqlSleep(s.opt.Sleep)
 			}
 		}
 	}
@@ -1965,7 +1965,7 @@ func (s *session) parseOptions(sql string) {
 		Execute:        viper.GetBool("execute"),
 		Backup:         viper.GetBool("backup"),
 		IgnoreWarnings: viper.GetBool("ignoreWarnings"),
-		sleep:          viper.GetInt("sleep"),
+		Sleep:          viper.GetInt("sleep"),
 		sleepRows:      viper.GetInt("sleepRows"),
 
 		middlewareExtend: viper.GetString("middlewareExtend"),
@@ -1980,7 +1980,7 @@ func (s *session) parseOptions(sql string) {
 		split:        viper.GetBool("split"),
 		RealRowCount: viper.GetBool("realRowCount"),
 
-		db: viper.GetString("db"),
+		DB: viper.GetString("db"),
 
 		// 连接加密
 		ssl:     viper.GetString("ssl"),

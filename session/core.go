@@ -433,7 +433,7 @@ func (s *session) checkOptions() error {
 		s.opt.IgnoreWarnings = true
 	}
 
-	if s.opt.sleep <= 0 {
+	if s.opt.Sleep <= 0 {
 		s.opt.sleepRows = 0
 	} else if s.opt.sleepRows < 1 {
 		s.opt.sleepRows = 1
@@ -466,7 +466,7 @@ func (s *session) checkOptions() error {
 			return err
 		}
 		addr = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=True&loc=Local&maxAllowedPacket=%d&tls=%s",
-			s.opt.User, s.opt.Password, s.opt.Host, s.opt.Port, s.opt.db,
+			s.opt.User, s.opt.Password, s.opt.Host, s.opt.Port, s.opt.DB,
 			s.inc.DefaultCharset, s.inc.MaxAllowedPacket, tlsValue)
 	} else {
 		s.opt.middlewareExtend = fmt.Sprintf("/*%s*/",

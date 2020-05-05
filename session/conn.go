@@ -162,7 +162,7 @@ func (s *session) rawScan(sqlStr string, dest interface{}) (err error) {
 func (s *session) initConnection() (err error) {
 	name := s.dbName
 	if name == "" {
-		name = s.opt.db
+		name = s.opt.DB
 	}
 
 	// 连接断开无效时,自动重试

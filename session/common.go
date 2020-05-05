@@ -118,7 +118,7 @@ type SourceOptions struct {
 
 	// 每次执行后休眠多少毫秒. 用以降低对线上数据库的影响，特别是针对大量写入的操作.
 	// 单位为毫秒，最小值为0, 最大值为100秒，也就是100000毫秒
-	sleep int
+	Sleep int
 	// 执行多条后休眠, 最小值1,默认值1
 	sleepRows int
 
@@ -142,7 +142,7 @@ type SourceOptions struct {
 	RealRowCount bool
 
 	// 连接的数据库,默认为mysql
-	db string
+	DB string
 
 	ssl     string // 连接加密
 	sslCA   string // 证书颁发机构（CA）证书

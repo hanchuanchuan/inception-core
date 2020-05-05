@@ -73,8 +73,8 @@ func (s *testSessionIncExecSuite) testErrorCode(c *C, sql string, errors ...*ses
 
 	session.CheckAuditSetting(config.GetGlobalConfig())
 
-	res := s.runExec(sql)
-	row := res.Rows()[s.getAffectedRows()-1]
+	s.runExec(sql)
+	row := s.rows[s.getAffectedRows()-1]
 
 	errCode := 0
 	if len(errors) > 0 {
@@ -95,21 +95,21 @@ func (s *testSessionIncExecSuite) testErrorCode(c *C, sql string, errors ...*ses
 	}
 	// 没有错误时允许有警告
 	// if errCode == 0 {
-	// 	c.Assert(row[2], Not(Equals), "2", Commentf("%v", res.Rows()))
+	// 	c.Assert(row[2], Not(Equals), "2", Commentf("%v", s.rows))
 	// } else {
-	// 	c.Assert(row[2], Equals, strconv.Itoa(errCode), Commentf("%v", res.Rows()))
+	// 	c.Assert(row[2], Equals, strconv.Itoa(errCode), Commentf("%v", s.rows))
 	// }
 	// 无错误时需要校验结果是否标记为已执行
 	if errCode == 0 {
-		c.Assert(strings.Contains(row[3].(string), "Execute Successfully"), Equals, true, Commentf("%v", res.Rows()))
-		for _, row := range res.Rows() {
-			c.Assert(row[2], Not(Equals), "2", Commentf("%v", res.Rows()))
+		c.Assert(strings.Contains(row[3].(string), "Execute Successfully"), Equals, true, Commentf("%v", s.rows))
+		for _, row := range s.rows {
+			c.Assert(row[2], Not(Equals), "2", Commentf("%v", s.rows))
 		}
 	} else {
-		c.Assert(row[2], Equals, strconv.Itoa(errCode), Commentf("%v", res.Rows()))
+		c.Assert(row[2], Equals, strconv.Itoa(errCode), Commentf("%v", s.rows))
 	}
 
-	return res.Rows()
+	return s.rows
 }
 
 func (s *testSessionIncExecSuite) testExecuteResult(c *C, sql string, errors ...*session.SQLError) {
@@ -677,9 +677,9 @@ func (s *testSessionIncExecSuite) TestAlterTableDropIndex(c *C) {
 // 	sql = "inception show variables like 'backup_password';"
 // 	res := s.tk.MustQueryInc(sql)
 
-// 	log.Errorf("s.tk.Se.AffectedRows():%v, len(res.Rows()):%v", s.tk.Se.AffectedRows(), len(res.Rows()))
+// 	log.Errorf("s.tk.Se.AffectedRows():%v, len(s.rows):%v", s.tk.Se.AffectedRows(), len(s.rows))
 
-// 	row := res.Rows()[s.tk.Se.AffectedRows()-1]
+// 	row := s.rows[s.tk.Se.AffectedRows()-1]
 // 	if row[1].(string) != "" {
 // 		c.Assert(row[1].(string)[:1], Equals, "*")
 // 	}
@@ -698,7 +698,7 @@ func (s *testSessionIncExecSuite) TestAlterTableDropIndex(c *C) {
 
 // 	sql = "inception show variables like 'backup_password';"
 // 	res := s.tk.MustQueryInc(sql)
-// 	row := res.Rows()[s.getAffectedRows()-1]
+// 	row := s.rows[s.getAffectedRows()-1]
 // 	if row[1].(string) != "" {
 // 		c.Assert(row[1].(string)[:1], Equals, "*")
 // 	}

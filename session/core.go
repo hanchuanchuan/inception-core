@@ -76,7 +76,6 @@ func NewInception() Session {
 	s.sessionVars.GlobalVarsAccessor = s
 
 	s.sessionVars.ConnectionID = atomic.AddUint64(&baseConnID, 1)
-
 	tz := timeutil.InferSystemTZ()
 	timeutil.SetSystemTZ(tz)
 
@@ -182,6 +181,12 @@ func (s *session) RunExecute(ctx context.Context, sql string) ([]Record, error) 
 	return s.makeNewResult()
 }
 
+// QueryTree 打印语法树. Print函数别名
+func (s *session) QueryTree(ctx context.Context, sql string) ([]PrintRecord, error) {
+	return s.Print(ctx, sql)
+}
+
+// QueryTree 打印语法树
 func (s *session) Print(ctx context.Context, sql string) ([]PrintRecord, error) {
 	if s.opt == nil {
 		return nil, errors.New("未配置数据源信息!")

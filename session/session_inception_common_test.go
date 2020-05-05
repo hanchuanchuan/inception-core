@@ -27,15 +27,12 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/hanchuanchuan/inception-core/ast"
 	"github.com/hanchuanchuan/inception-core/config"
-	"github.com/hanchuanchuan/inception-core/kv"
 	"github.com/hanchuanchuan/inception-core/parser"
 	"github.com/hanchuanchuan/inception-core/session"
 	"github.com/hanchuanchuan/inception-core/util/logutil"
-	"github.com/hanchuanchuan/inception-core/util/testkit"
-	"github.com/hanchuanchuan/inception-core/util/testleak"
 	"github.com/jinzhu/gorm"
 	. "github.com/pingcap/check"
-	repllog "github.com/siddontang/go-log/log"
+
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 )
@@ -56,10 +53,7 @@ func TestCommonTest(t *testing.T) {
 }
 
 type testCommon struct {
-	// cluster   *mocktikv.Cluster
-	// mvccStore mocktikv.MVCCStore
-	store  kv.Storage
-	tk     *testkit.TestKit
+	// store  kv.Storage
 	db     *gorm.DB
 	dbAddr string
 
@@ -104,7 +98,6 @@ func (s *testCommon) initSetUp(c *C) {
 	flag.Parse()
 
 	log.SetLevel(log.ErrorLevel)
-	repllog.SetLevel(repllog.LevelFatal)
 
 	s.realRowCount = true
 
@@ -160,7 +153,7 @@ func (s *testCommon) tearDownSuite(c *C) {
 	if testing.Short() {
 		c.Skip("skipping test; in TRAVIS mode")
 	} else {
-		testleak.AfterTest(c)()
+		// testleak.AfterTest(c)()
 		if s.db != nil {
 			s.db.Close()
 		}
@@ -229,7 +222,7 @@ func (s *testCommon) runCheck(sql string) {
 	}
 }
 
-func (s *testCommon) mustCheck(c *C, sql string) *testkit.Result {
+func (s *testCommon) mustCheck(c *C, sql string) {
 
 	s.sessionService.LoadOptions(session.SourceOptions{
 		Host:         s.defaultInc.BackupHost,
@@ -246,10 +239,10 @@ func (s *testCommon) mustCheck(c *C, sql string) *testkit.Result {
 		c.Assert(row.ErrLevel, Not(Equals), uint8(2), Commentf("%v", result))
 		s.rows[index] = row.List()
 	}
-	return nil
+
 }
 
-func (s *testCommon) runExec(sql string) *testkit.Result {
+func (s *testCommon) runExec(sql string) {
 
 	s.sessionService.LoadOptions(session.SourceOptions{
 		Host:           s.defaultInc.BackupHost,
@@ -266,10 +259,10 @@ func (s *testCommon) runExec(sql string) *testkit.Result {
 		// c.Assert(row.ErrLevel, Not(Equals), uint8(2), Commentf("%v", result))
 		s.rows[index] = row.List()
 	}
-	return nil
+
 }
 
-func (s *testCommon) mustRunExec(c *C, sql string) *testkit.Result {
+func (s *testCommon) mustRunExec(c *C, sql string) {
 	config.GetGlobalConfig().Inc.EnableDropTable = true
 	session.CheckAuditSetting(config.GetGlobalConfig())
 
@@ -289,10 +282,10 @@ func (s *testCommon) mustRunExec(c *C, sql string) *testkit.Result {
 		c.Assert(row.ErrLevel, Not(Equals), uint8(2), Commentf("%v", result))
 		s.rows[index] = row.List()
 	}
-	return nil
+
 }
 
-func (s *testCommon) runBackup(sql string) *testkit.Result {
+func (s *testCommon) runBackup(sql string) {
 
 	s.sessionService.LoadOptions(session.SourceOptions{
 		Host:           s.defaultInc.BackupHost,
@@ -310,10 +303,10 @@ func (s *testCommon) runBackup(sql string) *testkit.Result {
 		// c.Assert(row.ErrLevel, Not(Equals), uint8(2), Commentf("%v", result))
 		s.rows[index] = row.List()
 	}
-	return nil
+
 }
 
-func (s *testCommon) mustRunBackup(c *C, sql string) *testkit.Result {
+func (s *testCommon) mustRunBackup(c *C, sql string) {
 
 	s.sessionService.LoadOptions(session.SourceOptions{
 		Host:           s.defaultInc.BackupHost,
@@ -332,10 +325,9 @@ func (s *testCommon) mustRunBackup(c *C, sql string) *testkit.Result {
 		c.Assert(row.ErrLevel, Not(Equals), uint8(2), Commentf("%v", result))
 		s.rows[index] = row.List()
 	}
-	return nil
 }
 
-func (s *testCommon) mustRunBackupTran(c *C, sql string) *testkit.Result {
+func (s *testCommon) mustRunBackupTran(c *C, sql string) {
 
 	s.sessionService.LoadOptions(session.SourceOptions{
 		Host:           s.defaultInc.BackupHost,
@@ -355,10 +347,9 @@ func (s *testCommon) mustRunBackupTran(c *C, sql string) *testkit.Result {
 		c.Assert(row.ErrLevel, Not(Equals), uint8(2), Commentf("%v", result))
 		s.rows[index] = row.List()
 	}
-	return nil
 }
 
-func (s *testCommon) runTranSQL(sql string, batch int) *testkit.Result {
+func (s *testCommon) runTranSQL(sql string, batch int) {
 
 	s.sessionService.LoadOptions(session.SourceOptions{
 		Host:           s.defaultInc.BackupHost,
@@ -376,10 +367,9 @@ func (s *testCommon) runTranSQL(sql string, batch int) *testkit.Result {
 	for index, row := range result {
 		s.rows[index] = row.List()
 	}
-	return nil
 }
 
-func (s *testCommon) mustrunTranSQL(c *C, sql string) *testkit.Result {
+func (s *testCommon) mustrunTranSQL(c *C, sql string) {
 
 	s.sessionService.LoadOptions(session.SourceOptions{
 		Host:           s.defaultInc.BackupHost,
@@ -398,7 +388,6 @@ func (s *testCommon) mustrunTranSQL(c *C, sql string) *testkit.Result {
 		c.Assert(row.ErrLevel, Not(Equals), uint8(2), Commentf("%v", result))
 		s.rows[index] = row.List()
 	}
-	return nil
 }
 
 func (s *testCommon) getAddr() string {

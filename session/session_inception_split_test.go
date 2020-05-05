@@ -21,7 +21,6 @@ import (
 
 	"github.com/hanchuanchuan/inception-core/config"
 	"github.com/hanchuanchuan/inception-core/session"
-	"github.com/hanchuanchuan/inception-core/util/testkit"
 	. "github.com/pingcap/check"
 	"golang.org/x/net/context"
 )
@@ -50,7 +49,7 @@ func (s *testSessionSplitSuite) TearDownSuite(c *C) {
 	s.tearDownSuite(c)
 }
 
-func (s *testSessionSplitSuite) makeSQL(sql string) *testkit.Result {
+func (s *testSessionSplitSuite) makeSQL(sql string) {
 
 	s.sessionService.LoadOptions(session.SourceOptions{
 		Host:           s.defaultInc.BackupHost,
@@ -65,14 +64,6 @@ func (s *testSessionSplitSuite) makeSQL(sql string) *testkit.Result {
 	for index, row := range result {
 		s.rows[index] = row.List()
 	}
-	return nil
-
-	// 	a := `/*--user=test;--password=test;--host=127.0.0.1;--split=1;--port=3306;--enable-ignore-warnings;*/
-	// inception_magic_start;
-	// use test_inc;
-	// %s;
-	// inception_magic_commit;`
-	// 	return s.tk.MustQueryInc(fmt.Sprintf(a, sql))
 }
 
 // func (s *testSessionSplitSuite) TestWrongStmt(c *C) {
@@ -170,7 +161,7 @@ func (s *testSessionSplitSuite) testRows(c *C, sql string, count int) {
 
 	s.makeSQL(sql)
 	c.Assert(len(s.rows), Equals, count, Commentf("%v", s.rows))
-	c.Assert(int(s.tk.Se.AffectedRows()), Equals, count, Commentf("%v", s.rows))
+	c.Assert(int(s.getAffectedRows()), Equals, count, Commentf("%v", s.rows))
 
 	for _, row := range s.rows {
 		c.Assert(row[3], Equals, "<nil>", Commentf("%v", row))

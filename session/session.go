@@ -54,6 +54,7 @@ type Session interface {
 	sessionctx.Context
 	AffectedRows() uint64 // Affected rows by latest executed stmt.
 	// Execute(context.Context, string) ([]sqlexec.RecordSet, error)    // Execute a sql statement.
+	Execute(context.Context, string) ([]Record, error)               // Execute a sql statement.
 	ExecuteInc(context.Context, string) ([]sqlexec.RecordSet, error) // Execute a sql statement.
 
 	SetConnectionID(uint64)
@@ -68,11 +69,18 @@ type Session interface {
 	// 用以测试
 	GetAlterTablePostPart(sql string, isPtOSC bool) string
 
+	// LoadOptions 加载配置
 	LoadOptions(opt SourceOptions) error
+	// Audit 审核
 	Audit(ctx context.Context, sql string) ([]Record, error)
+	// RunExecute 执行
 	RunExecute(ctx context.Context, sql string) ([]Record, error)
+	// 拆分
 	Split(ctx context.Context, sql string) ([]SplitRecord, error)
+	// 打印语法树
 	Print(ctx context.Context, sql string) ([]PrintRecord, error)
+	// 打印语法树
+	QueryTree(ctx context.Context, sql string) ([]PrintRecord, error)
 }
 
 var (
@@ -415,12 +423,8 @@ func (s *session) SetMyProcessInfo(sql string, t time.Time, percent float64) {
 	}
 }
 
-func (s *session) Execute(ctx context.Context, sql string) (recordSets []sqlexec.RecordSet, err error) {
-	// if recordSets, err = s.Audit(ctx, sql); err != nil {
-	// 	err = errors.Trace(err)
-	// 	s.sessionVars.StmtCtx.AppendError(err)
-	// }
-	return
+func (s *session) Execute(ctx context.Context, sql string) ([]Record, error) {
+	return s.RunExecute(ctx, sql)
 }
 
 func (s *session) Txn() kv.Transaction {

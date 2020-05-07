@@ -210,7 +210,7 @@ func (s *session) Split(ctx context.Context, sql string) ([]SplitRecord, error) 
 	}
 	s.init()
 	defer s.clear()
-	s.opt.split = true
+	s.opt.Split = true
 	err := s.audit(ctx, sql)
 	if err != nil {
 		log.Error(err)
@@ -240,7 +240,7 @@ func (s *session) audit(ctx context.Context, sql string) (err error) {
 		if s.sessionVars.StmtCtx.AffectedRows() == 0 {
 			if s.opt != nil && s.opt.Print {
 				s.sessionVars.StmtCtx.AddAffectedRows(uint64(s.printSets.rc.count))
-			} else if s.opt != nil && s.opt.split {
+			} else if s.opt != nil && s.opt.Split {
 				s.sessionVars.StmtCtx.AddAffectedRows(uint64(s.splitSets.rc.count))
 			} else {
 				if s.recordSets == nil {
@@ -288,7 +288,7 @@ func (s *session) audit(ctx context.Context, sql string) (err error) {
 
 	if s.opt.Print {
 		s.printSets = NewPrintSets()
-	} else if s.opt.split {
+	} else if s.opt.Split {
 		s.splitSets = NewSplitSets()
 	}
 
@@ -341,7 +341,7 @@ func (s *session) audit(ctx context.Context, sql string) (err error) {
 				log.Error(s1)
 				if s.opt != nil && s.opt.Print {
 					s.printSets.Append(2, strings.TrimSpace(s1), "", err.Error())
-				} else if s.opt != nil && s.opt.split {
+				} else if s.opt != nil && s.opt.Split {
 					s.addNewSplitNode()
 					s.splitSets.Append(strings.TrimSpace(s1), err.Error())
 				} else {
@@ -371,7 +371,7 @@ func (s *session) audit(ctx context.Context, sql string) (err error) {
 				var err error
 				if s.opt != nil && s.opt.Print {
 					result, err = s.printCommand(ctx, stmtNode, currentSQL)
-				} else if s.opt != nil && s.opt.split {
+				} else if s.opt != nil && s.opt.Split {
 					result, err = s.splitCommand(ctx, stmtNode, currentSQL)
 				} else {
 					result, err = s.processCommand(ctx, stmtNode, currentSQL)
@@ -389,7 +389,7 @@ func (s *session) audit(ctx context.Context, sql string) (err error) {
 					s.appendErrorMessage("Operation has been killed!")
 					if s.opt != nil && s.opt.Print {
 						s.printSets.Append(2, "", "", strings.TrimSpace(s.myRecord.Buf.String()))
-					} else if s.opt != nil && s.opt.split {
+					} else if s.opt != nil && s.opt.Split {
 						s.addNewSplitNode()
 						s.splitSets.Append("", strings.TrimSpace(s.myRecord.Buf.String()))
 					} else {
@@ -430,7 +430,7 @@ func (s *session) checkOptions() error {
 		return errors.New("未配置数据源信息!")
 	}
 
-	if s.opt.split || s.opt.Check || s.opt.Print {
+	if s.opt.Split || s.opt.Check || s.opt.Print {
 		s.opt.Execute = false
 		s.opt.Backup = false
 
@@ -439,12 +439,12 @@ func (s *session) checkOptions() error {
 	}
 
 	if s.opt.Sleep <= 0 {
-		s.opt.sleepRows = 0
-	} else if s.opt.sleepRows < 1 {
-		s.opt.sleepRows = 1
+		s.opt.SleepRows = 0
+	} else if s.opt.SleepRows < 1 {
+		s.opt.SleepRows = 1
 	}
 
-	if s.opt.split || s.opt.Print {
+	if s.opt.Split || s.opt.Print {
 		s.opt.Check = false
 	}
 

@@ -120,7 +120,7 @@ type SourceOptions struct {
 	// 单位为毫秒，最小值为0, 最大值为100秒，也就是100000毫秒
 	Sleep int
 	// 执行多条后休眠, 最小值1,默认值1
-	sleepRows int
+	SleepRows int
 
 	// 仅供第三方扩展使用! 设置该字符串会跳过binlog解析!
 	middlewareExtend string
@@ -136,7 +136,7 @@ type SourceOptions struct {
 	Print bool
 
 	// DDL/DML分隔功能
-	split bool
+	Split bool
 
 	// 使用count(*)计算受影响行数
 	RealRowCount bool

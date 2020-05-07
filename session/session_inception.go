@@ -109,7 +109,7 @@ func (s *session) executeInc(ctx context.Context, sql string) (recordSets []sqle
 		if s.sessionVars.StmtCtx.AffectedRows() == 0 {
 			if s.opt != nil && s.opt.Print {
 				s.sessionVars.StmtCtx.AddAffectedRows(uint64(s.printSets.rc.count))
-			} else if s.opt != nil && s.opt.split {
+			} else if s.opt != nil && s.opt.Split {
 				if s.splitSets != nil {
 					s.sessionVars.StmtCtx.AddAffectedRows(uint64(s.splitSets.rc.count))
 				} else {
@@ -193,7 +193,7 @@ func (s *session) executeInc(ctx context.Context, sql string) (recordSets []sqle
 				}
 				if s.opt != nil && s.opt.Print {
 					s.printSets.Append(2, strings.TrimSpace(s1), "", err.Error())
-				} else if s.opt != nil && s.opt.split {
+				} else if s.opt != nil && s.opt.Split {
 					s.addNewSplitNode()
 					s.splitSets.Append(strings.TrimSpace(s1), err.Error())
 				} else {
@@ -229,7 +229,7 @@ func (s *session) executeInc(ctx context.Context, sql string) (recordSets []sqle
 
 						if s.opt != nil && s.opt.Print {
 							s.printSets.Append(2, currentSql, "", s.getErrorMessage(ER_HAVE_BEGIN))
-						} else if s.opt != nil && s.opt.split {
+						} else if s.opt != nil && s.opt.Split {
 							s.addNewSplitNode()
 							s.splitSets.Append(currentSql, s.getErrorMessage(ER_HAVE_BEGIN))
 						} else {
@@ -260,7 +260,7 @@ func (s *session) executeInc(ctx context.Context, sql string) (recordSets []sqle
 
 					if s.opt.Print {
 						s.printSets = NewPrintSets()
-					} else if s.opt.split {
+					} else if s.opt.Split {
 						s.splitSets = NewSplitSets()
 					}
 
@@ -272,7 +272,7 @@ func (s *session) executeInc(ctx context.Context, sql string) (recordSets []sqle
 
 						if s.opt != nil && s.opt.Print {
 							s.printSets.Append(2, "", "", strings.TrimSpace(s.myRecord.Buf.String()))
-						} else if s.opt != nil && s.opt.split {
+						} else if s.opt != nil && s.opt.Split {
 							s.addNewSplitNode()
 							s.splitSets.Append("", strings.TrimSpace(s.myRecord.Buf.String()))
 						} else {
@@ -297,7 +297,7 @@ func (s *session) executeInc(ctx context.Context, sql string) (recordSets []sqle
 						s.appendErrorMessage("Must start as begin statement.")
 						if s.opt != nil && s.opt.Print {
 							s.printSets.Append(2, "", "", strings.TrimSpace(s.myRecord.Buf.String()))
-						} else if s.opt != nil && s.opt.split {
+						} else if s.opt != nil && s.opt.Split {
 							s.addNewSplitNode()
 							s.splitSets.Append("", strings.TrimSpace(s.myRecord.Buf.String()))
 						} else {
@@ -331,7 +331,7 @@ func (s *session) executeInc(ctx context.Context, sql string) (recordSets []sqle
 						s.appendErrorMessage("Must start as begin statement.")
 						if s.opt != nil && s.opt.Print {
 							s.printSets.Append(2, "", "", strings.TrimSpace(s.myRecord.Buf.String()))
-						} else if s.opt != nil && s.opt.split {
+						} else if s.opt != nil && s.opt.Split {
 							s.addNewSplitNode()
 							s.splitSets.Append("", strings.TrimSpace(s.myRecord.Buf.String()))
 						} else {
@@ -360,7 +360,7 @@ func (s *session) executeInc(ctx context.Context, sql string) (recordSets []sqle
 						var err error
 						if s.opt != nil && s.opt.Print {
 							result, err = s.printCommand(ctx, stmtNode, currentSql)
-						} else if s.opt != nil && s.opt.split {
+						} else if s.opt != nil && s.opt.Split {
 							result, err = s.splitCommand(ctx, stmtNode, currentSql)
 						} else {
 							result, err = s.processCommand(ctx, stmtNode, currentSql)
@@ -379,7 +379,7 @@ func (s *session) executeInc(ctx context.Context, sql string) (recordSets []sqle
 						s.appendErrorMessage("Operation has been killed!")
 						if s.opt != nil && s.opt.Print {
 							s.printSets.Append(2, "", "", strings.TrimSpace(s.myRecord.Buf.String()))
-						} else if s.opt != nil && s.opt.split {
+						} else if s.opt != nil && s.opt.Split {
 							s.addNewSplitNode()
 							s.splitSets.Append("", strings.TrimSpace(s.myRecord.Buf.String()))
 						} else {
@@ -394,7 +394,7 @@ func (s *session) executeInc(ctx context.Context, sql string) (recordSets []sqle
 					s.appendErrorMessage("Must start as begin statement.")
 					if s.opt != nil && s.opt.Print {
 						s.printSets.Append(2, "", "", strings.TrimSpace(s.myRecord.Buf.String()))
-					} else if s.opt != nil && s.opt.split {
+					} else if s.opt != nil && s.opt.Split {
 						s.addNewSplitNode()
 						s.splitSets.Append("", strings.TrimSpace(s.myRecord.Buf.String()))
 					} else {
@@ -426,7 +426,7 @@ func (s *session) executeInc(ctx context.Context, sql string) (recordSets []sqle
 	if s.haveBegin && !s.haveCommit {
 		if s.opt != nil && s.opt.Print {
 			s.printSets.Append(2, "", "", "Must end with commit.")
-		} else if s.opt != nil && s.opt.split {
+		} else if s.opt != nil && s.opt.Split {
 			s.addNewSplitNode()
 			s.splitSets.Append("", "Must end with commit.")
 		} else {
@@ -444,7 +444,7 @@ func (s *session) executeInc(ctx context.Context, sql string) (recordSets []sqle
 func (s *session) makeResult() (recordSets []sqlexec.RecordSet, err error) {
 	if s.opt != nil && s.opt.Print && s.printSets != nil {
 		return s.printSets.Rows(), nil
-	} else if s.opt != nil && s.opt.split && s.splitSets != nil {
+	} else if s.opt != nil && s.opt.Split && s.splitSets != nil {
 		s.addNewSplitNode()
 		// log.Infof("%#v", s.splitSets)
 		return s.splitSets.Rows(), nil
@@ -654,7 +654,7 @@ func (s *session) processCommand(ctx context.Context, stmtNode ast.StmtNode,
 
 func (s *session) executeCommit(ctx context.Context) {
 
-	if s.opt.Check || s.opt.Print || !s.opt.Execute || s.opt.split {
+	if s.opt.Check || s.opt.Print || !s.opt.Execute || s.opt.Split {
 		return
 	}
 
@@ -871,10 +871,10 @@ func (s *session) executeAllStatement(ctx context.Context) {
 					trans = nil
 					trans = append(trans, record)
 
-					if s.opt.Sleep > 0 && s.opt.sleepRows > 0 {
-						if s.opt.sleepRows == 1 {
+					if s.opt.Sleep > 0 && s.opt.SleepRows > 0 {
+						if s.opt.SleepRows == 1 {
 							mysqlSleep(s.opt.Sleep)
-						} else if i%s.opt.sleepRows == 0 {
+						} else if i%s.opt.SleepRows == 0 {
 							mysqlSleep(s.opt.Sleep)
 						}
 					}
@@ -926,10 +926,10 @@ func (s *session) executeAllStatement(ctx context.Context) {
 				// s.executeTransaction(trans)
 				// trans = nil
 
-				if s.opt.Sleep > 0 && s.opt.sleepRows > 0 {
-					if s.opt.sleepRows == 1 {
+				if s.opt.Sleep > 0 && s.opt.SleepRows > 0 {
+					if s.opt.SleepRows == 1 {
 						mysqlSleep(s.opt.Sleep)
-					} else if i%s.opt.sleepRows == 0 {
+					} else if i%s.opt.SleepRows == 0 {
 						mysqlSleep(s.opt.Sleep)
 					}
 				}
@@ -952,10 +952,10 @@ func (s *session) executeAllStatement(ctx context.Context) {
 			break
 		}
 
-		if s.opt.TranBatch <= 1 && s.opt.Sleep > 0 && s.opt.sleepRows > 0 {
-			if s.opt.sleepRows == 1 {
+		if s.opt.TranBatch <= 1 && s.opt.Sleep > 0 && s.opt.SleepRows > 0 {
+			if s.opt.SleepRows == 1 {
 				mysqlSleep(s.opt.Sleep)
-			} else if i%s.opt.sleepRows == 0 {
+			} else if i%s.opt.SleepRows == 0 {
 				mysqlSleep(s.opt.Sleep)
 			}
 		}
@@ -1966,7 +1966,7 @@ func (s *session) parseOptions(sql string) {
 		Backup:         viper.GetBool("backup"),
 		IgnoreWarnings: viper.GetBool("ignoreWarnings"),
 		Sleep:          viper.GetInt("sleep"),
-		sleepRows:      viper.GetInt("sleepRows"),
+		SleepRows:      viper.GetInt("sleepRows"),
 
 		middlewareExtend: viper.GetString("middlewareExtend"),
 		middlewareDB:     viper.GetString("middlewareDB"),
@@ -1977,7 +1977,7 @@ func (s *session) parseOptions(sql string) {
 
 		Print: viper.GetBool("queryPrint"),
 
-		split:        viper.GetBool("split"),
+		Split:        viper.GetBool("split"),
 		RealRowCount: viper.GetBool("realRowCount"),
 
 		DB: viper.GetString("db"),
@@ -1992,7 +1992,7 @@ func (s *session) parseOptions(sql string) {
 		TranBatch: viper.GetInt("trans"),
 	}
 
-	if s.opt.split || s.opt.Check || s.opt.Print {
+	if s.opt.Split || s.opt.Check || s.opt.Print {
 		s.opt.Execute = false
 		s.opt.Backup = false
 

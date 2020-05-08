@@ -357,7 +357,11 @@ func (s *session) audit(ctx context.Context, sql string) (err error) {
 			for i, stmtNode := range stmtNodes {
 				//  是ASCII码160的特殊空格
 				currentSQL := strings.Trim(stmtNode.Text(), " ;\t\n\v\f\r ")
-
+				switch stmtNode.(type) {
+				case *ast.InceptionStartStmt,
+					*ast.InceptionCommitStmt:
+					continue
+				}
 				s.myRecord = &Record{
 					Sql:   currentSQL,
 					Buf:   new(bytes.Buffer),

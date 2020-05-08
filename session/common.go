@@ -123,14 +123,14 @@ type SourceOptions struct {
 	SleepRows int
 
 	// 仅供第三方扩展使用! 设置该字符串会跳过binlog解析!
-	middlewareExtend string
-	middlewareDB     string
+	MiddlewareExtend string
+	MiddlewareDB     string
 	// 原始主机和端口,用以解析binlog
-	parseHost string
-	parsePort int
+	ParseHost string
+	ParsePort int
 
 	// sql指纹功能,可在调用参数中设置,也可全局设置,值取并集
-	fingerprint bool
+	Fingerprint bool
 
 	// 打印语法树功能
 	Print bool
@@ -144,10 +144,10 @@ type SourceOptions struct {
 	// 连接的数据库,默认为mysql
 	DB string
 
-	ssl     string // 连接加密
-	sslCA   string // 证书颁发机构（CA）证书
-	sslCert string // 客户端公共密钥证书
-	sslKey  string // 客户端私钥文件
+	Ssl     string // 连接加密
+	SslCA   string // 证书颁发机构（CA）证书
+	SslCert string // 客户端公共密钥证书
+	SslKey  string // 客户端私钥文件
 
 	// 事务支持,一次执行多少条
 	TranBatch int

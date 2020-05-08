@@ -293,7 +293,7 @@ func (s *session) audit(ctx context.Context, sql string) (err error) {
 	}
 
 	// sql指纹设置取并集
-	if s.opt.fingerprint {
+	if s.opt.Fingerprint {
 		s.inc.EnableFingerprint = true
 	}
 
@@ -465,7 +465,7 @@ func (s *session) checkOptions() error {
 	}
 
 	var addr string
-	if s.opt.middlewareExtend == "" {
+	if s.opt.MiddlewareExtend == "" {
 		tlsValue, err := s.getTLSConfig()
 		if err != nil {
 			return err
@@ -474,12 +474,12 @@ func (s *session) checkOptions() error {
 			s.opt.User, s.opt.Password, s.opt.Host, s.opt.Port, s.opt.DB,
 			s.inc.DefaultCharset, s.inc.MaxAllowedPacket, tlsValue)
 	} else {
-		s.opt.middlewareExtend = fmt.Sprintf("/*%s*/",
-			strings.Replace(s.opt.middlewareExtend, ": ", "=", 1))
+		s.opt.MiddlewareExtend = fmt.Sprintf("/*%s*/",
+			strings.Replace(s.opt.MiddlewareExtend, ": ", "=", 1))
 
 		addr = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=True&loc=Local&maxAllowedPacket=%d&maxOpen=100&maxLifetime=60",
 			s.opt.User, s.opt.Password, s.opt.Host, s.opt.Port,
-			s.opt.middlewareDB, s.inc.DefaultCharset, s.inc.MaxAllowedPacket)
+			s.opt.MiddlewareDB, s.inc.DefaultCharset, s.inc.MaxAllowedPacket)
 	}
 
 	db, err := gorm.Open("mysql", fmt.Sprintf("%s&autocommit=1", addr))

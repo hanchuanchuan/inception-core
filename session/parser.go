@@ -215,8 +215,8 @@ func (s *session) parserBinlog(ctx context.Context) {
 		port uint16
 	)
 	if s.isMiddleware() {
-		host = s.opt.parseHost
-		port = uint16(s.opt.parsePort)
+		host = s.opt.ParseHost
+		port = uint16(s.opt.ParsePort)
 	} else {
 		host = s.opt.Host
 		port = uint16(s.opt.Port)

@@ -282,7 +282,7 @@ func (s *session) executeInc(ctx context.Context, sql string) (recordSets []sqle
 					}
 
 					// sql指纹设置取并集
-					if s.opt.fingerprint {
+					if s.opt.Fingerprint {
 						s.inc.EnableFingerprint = true
 					}
 
@@ -766,7 +766,7 @@ func (s *session) executeCommit(ctx context.Context) {
 		if !s.isMiddleware() {
 			// 解析binlog生成回滚语句
 			s.parserBinlog(ctx)
-		} else if s.opt.parseHost != "" && s.opt.parsePort != 0 {
+		} else if s.opt.ParseHost != "" && s.opt.ParsePort != 0 {
 			s.parserBinlog(ctx)
 		}
 	}
@@ -1539,7 +1539,7 @@ func (s *session) mysqlFetchMasterBinlogPosition() *MasterStatus {
 
 	sql := "SHOW MASTER STATUS;"
 	if s.isMiddleware() {
-		sql = s.opt.middlewareExtend + sql
+		sql = s.opt.MiddlewareExtend + sql
 	}
 
 	var r MasterStatus
@@ -1722,7 +1722,7 @@ func (s *session) fetchThreadID() uint32 {
 	var threadId uint64
 	sql := "select connection_id();"
 	if s.isMiddleware() {
-		sql = s.opt.middlewareExtend + sql
+		sql = s.opt.MiddlewareExtend + sql
 	}
 
 	rows, err := s.raw(sql)
@@ -1968,12 +1968,12 @@ func (s *session) parseOptions(sql string) {
 		Sleep:          viper.GetInt("sleep"),
 		SleepRows:      viper.GetInt("sleepRows"),
 
-		middlewareExtend: viper.GetString("middlewareExtend"),
-		middlewareDB:     viper.GetString("middlewareDB"),
-		parseHost:        viper.GetString("parseHost"),
-		parsePort:        viper.GetInt("parsePort"),
+		MiddlewareExtend: viper.GetString("middlewareExtend"),
+		MiddlewareDB:     viper.GetString("middlewareDB"),
+		ParseHost:        viper.GetString("parseHost"),
+		ParsePort:        viper.GetInt("parsePort"),
 
-		fingerprint: viper.GetBool("fingerprint"),
+		Fingerprint: viper.GetBool("fingerprint"),
 
 		Print: viper.GetBool("queryPrint"),
 
@@ -1983,10 +1983,10 @@ func (s *session) parseOptions(sql string) {
 		DB: viper.GetString("db"),
 
 		// 连接加密
-		ssl:     viper.GetString("ssl"),
-		sslCA:   viper.GetString("sslCa"),
-		sslCert: viper.GetString("sslCert"),
-		sslKey:  viper.GetString("sslKey"),
+		Ssl:     viper.GetString("ssl"),
+		SslCA:   viper.GetString("sslCa"),
+		SslCert: viper.GetString("sslCert"),
+		SslKey:  viper.GetString("sslKey"),
 
 		// 开启事务功能，设置一次提交多少记录
 		TranBatch: viper.GetInt("trans"),
@@ -2014,35 +2014,35 @@ func (s *session) parseOptions(sql string) {
 // https://dev.mysql.com/doc/refman/5.7/en/connection-options.html#option_general_ssl-mode
 func (s *session) getTLSConfig() (string, error) {
 	tlsValue := "false"
-	s.opt.ssl = strings.ToLower(s.opt.ssl)
-	switch s.opt.ssl {
+	s.opt.Ssl = strings.ToLower(s.opt.Ssl)
+	switch s.opt.Ssl {
 	case "preferred", "true":
 		tlsValue = "true"
 	case "required":
 		tlsValue = "skip-verify"
 	case "verify_ca", "verify_identity":
 		var errMsg string
-		if s.opt.sslCA == "" {
+		if s.opt.SslCA == "" {
 			errMsg = "required CA file in PEM format."
 		}
-		if s.opt.sslCert == "" {
+		if s.opt.SslCert == "" {
 			errMsg += "required X509 cert in PEM format."
 		}
-		if s.opt.sslCert == "" {
+		if s.opt.SslCert == "" {
 			errMsg += "required X509 key in PEM format."
 		}
 		if errMsg != "" {
 			return "", fmt.Errorf("con:%d %s", s.sessionVars.ConnectionID, errMsg)
 		}
 
-		if !Exist(s.opt.sslCA) {
-			errMsg = fmt.Sprintf("file: %s cannot open.", s.opt.sslCA)
+		if !Exist(s.opt.SslCA) {
+			errMsg = fmt.Sprintf("file: %s cannot open.", s.opt.SslCA)
 		}
-		if !Exist(s.opt.sslCert) {
-			errMsg += fmt.Sprintf("file: %s cannot open.", s.opt.sslCA)
+		if !Exist(s.opt.SslCert) {
+			errMsg += fmt.Sprintf("file: %s cannot open.", s.opt.SslCA)
 		}
-		if !Exist(s.opt.sslKey) {
-			errMsg += fmt.Sprintf("file: %s cannot open.", s.opt.sslCA)
+		if !Exist(s.opt.SslKey) {
+			errMsg += fmt.Sprintf("file: %s cannot open.", s.opt.SslCA)
 		}
 
 		if errMsg != "" {
@@ -2057,7 +2057,7 @@ func (s *session) getTLSConfig() (string, error) {
 		tlsValue = strings.Replace(tlsValue, ".", "_", -1)
 
 		rootCertPool := x509.NewCertPool()
-		pem, err := ioutil.ReadFile(s.opt.sslCA)
+		pem, err := ioutil.ReadFile(s.opt.SslCA)
 		if err != nil {
 			return "", fmt.Errorf("con:%d %v", s.sessionVars.ConnectionID, err)
 		}
@@ -2066,7 +2066,7 @@ func (s *session) getTLSConfig() (string, error) {
 		}
 
 		clientCert := make([]tls.Certificate, 0, 1)
-		certs, err := tls.LoadX509KeyPair(s.opt.sslCert, s.opt.sslKey)
+		certs, err := tls.LoadX509KeyPair(s.opt.SslCert, s.opt.SslKey)
 		if err != nil {
 			return "", fmt.Errorf("con:%d %v", s.sessionVars.ConnectionID, err)
 		}
@@ -2076,7 +2076,7 @@ func (s *session) getTLSConfig() (string, error) {
 			// ServerName:         s.opt.host,
 			RootCAs:            rootCertPool,
 			Certificates:       clientCert,
-			InsecureSkipVerify: s.opt.ssl == "verify_ca",
+			InsecureSkipVerify: s.opt.Ssl == "verify_ca",
 		})
 
 	default:
@@ -6149,7 +6149,7 @@ func (s *session) explainOrAnalyzeSql(sql string) {
 		var explain []string
 
 		if s.isMiddleware() {
-			explain = append(explain, s.opt.middlewareExtend)
+			explain = append(explain, s.opt.MiddlewareExtend)
 		}
 
 		explain = append(explain, "EXPLAIN ")
@@ -7395,7 +7395,7 @@ func (s *session) getTableInfoByTableSource(tableList []*ast.TableSource) (table
 	return tableInfoList
 }
 func (s *session) isMiddleware() bool {
-	return s.opt.middlewareExtend != ""
+	return s.opt.MiddlewareExtend != ""
 }
 
 func (s *session) executeKillStmt(node *ast.KillStmt) ([]sqlexec.RecordSet, error) {

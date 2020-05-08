@@ -1392,7 +1392,7 @@ func (s *session) executeRemoteStatement(record *Record, isTran bool) {
 
 	start := time.Now()
 
-	if record.useOsc {
+	if record.UseOsc {
 		if s.ghost.GhostOn {
 			log.Infof("con:%d use gh-ost", s.sessionVars.ConnectionID)
 			s.mysqlExecuteAlterTableGhost(record)
@@ -2984,7 +2984,7 @@ func (s *session) checkAlterTable(node *ast.AlterTableStmt, sql string) {
 			s.checkAlterUseOsc(table)
 		} else {
 			hasRenameTable = true
-			s.myRecord.useOsc = false
+			s.myRecord.UseOsc = false
 			break
 		}
 	}
@@ -3035,7 +3035,7 @@ func (s *session) checkAlterTable(node *ast.AlterTableStmt, sql string) {
 			s.appendErrorNo(ErCantChangeColumn, alter.OldColumnName.String())
 
 			// 如果使用pt-osc,且非第一条语句使用了change命令,则禁止
-			if i > 0 && s.myRecord.useOsc && s.osc.OscOn && !s.ghost.GhostOn {
+			if i > 0 && s.myRecord.UseOsc && s.osc.OscOn && !s.ghost.GhostOn {
 				s.appendErrorMessage("Can't execute this sql,the renamed columns' data maybe lost(pt-osc have a bug)!")
 			}
 			s.checkChangeColumn(table, alter)

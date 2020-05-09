@@ -3624,6 +3624,9 @@ func (s *session) hasError() bool {
 
 // hasError return all sql has errors or warnings
 func (s *session) hasErrorBefore() bool {
+	if s.recordSets == nil {
+		return true
+	}
 	if s.recordSets.MaxLevel == 2 ||
 		(s.recordSets.MaxLevel == 1 && !s.opt.IgnoreWarnings) {
 		return true

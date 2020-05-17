@@ -39,7 +39,7 @@ import (
 
 var baseConnID uint64
 
-func (s *session) makeNewResult() ([]Record, error) {
+func (s *session) makeNewResult() []Record {
 	// if s.opt != nil && s.opt.Print && s.printSets != nil {
 	// 	return s.printSets.Rows(), nil
 	// } else if s.opt != nil && s.opt.split && s.splitSets != nil {
@@ -50,7 +50,7 @@ func (s *session) makeNewResult() ([]Record, error) {
 
 	// }
 	if s.recordSets == nil {
-		return []Record{}, nil
+		return []Record{}
 	}
 
 	records := make([]Record, len(s.recordSets.records))
@@ -61,7 +61,7 @@ func (s *session) makeNewResult() ([]Record, error) {
 		r.cut()
 		records[i] = *r
 	}
-	return records, nil
+	return records
 }
 
 // NewInception 返回审核服务会话
@@ -155,7 +155,7 @@ func (s *session) Audit(ctx context.Context, sql string) ([]Record, error) {
 	if err != nil {
 		log.Error(err)
 	}
-	return s.makeNewResult()
+	return s.makeNewResult(), err
 	// return s.recordSets.records, nil
 	// return s.makeResult()
 }
@@ -171,14 +171,17 @@ func (s *session) RunExecute(ctx context.Context, sql string) ([]Record, error) 
 
 	s.opt.Check = false
 	s.opt.Execute = true
-	s.audit(ctx, sql)
+	err := s.audit(ctx, sql)
+	if err != nil {
+		log.Error(err)
+	}
 
 	if s.hasErrorBefore() {
-		return s.makeNewResult()
+		return s.makeNewResult(), err
 	}
 	s.executeCommit(ctx)
 
-	return s.makeNewResult()
+	return s.makeNewResult(), err
 }
 
 // QueryTree 打印语法树. Print函数别名

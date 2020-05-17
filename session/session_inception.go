@@ -3908,7 +3908,7 @@ func (s *session) checkIndexAttr(tp ast.ConstraintType, name string,
 
 	case ast.ConstraintUniq:
 		if !strings.HasPrefix(strings.ToLower(name), s.inc.UniqIndexPrefix) {
-			s.appendErrorNo(ER_INDEX_NAME_UNIQ_PREFIX, name, s.inc.UniqIndexPrefix, table.Name)
+			s.appendErrorNo(ER_INDEX_NAME_UNIQ_PREFIX, name, table.Name, s.inc.UniqIndexPrefix)
 		}
 
 	case ast.ConstraintSpatial:
@@ -3917,8 +3917,17 @@ func (s *session) checkIndexAttr(tp ast.ConstraintType, name string,
 		}
 
 	default:
-		if !strings.HasPrefix(strings.ToLower(name), s.inc.IndexPrefix) {
-			s.appendErrorNo(ER_INDEX_NAME_IDX_PREFIX, name, s.inc.IndexPrefix, table.Name)
+		if s.inc.IndexPrefix != "" {
+			var found bool
+			for _, v := range strings.Split(s.inc.IndexPrefix, ",") {
+				if strings.HasPrefix(name, v) {
+					found = true
+					break
+				}
+			}
+			if !found {
+				s.appendErrorNo(ER_INDEX_NAME_IDX_PREFIX, name, table.Name, s.inc.IndexPrefix)
+			}
 		}
 	}
 

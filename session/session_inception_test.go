@@ -60,6 +60,7 @@ func (s *testSessionIncSuite) SetUpSuite(c *C) {
 	inc.EnableFingerprint = true
 	inc.SqlSafeUpdates = 0
 	inc.EnableDropTable = true
+	inc.EnableIdentiferKeyword = true
 }
 
 func (s *testSessionIncSuite) TearDownSuite(c *C) {
@@ -596,18 +597,18 @@ primary key(id)) comment 'test';`
 	config.GetGlobalConfig().Inc.EnableJsonType = true
 	if s.DBVersion >= 50700 {
 		sql = `CREATE TABLE t1(c1 json DEFAULT '{}' COMMENT '日志记录',
-	  type tinyint(10) GENERATED ALWAYS AS (json_extract(operate_info, '$.type')) VIRTUAL COMMENT '操作类型')
+	  type1 tinyint(10) GENERATED ALWAYS AS (json_extract(operate_info, '$.type')) VIRTUAL COMMENT '操作类型')
 	  ENGINE = InnoDB DEFAULT CHARSET = utf8 COMMENT ='xxx';`
 		s.testErrorCode(c, sql,
 			session.NewErr(session.ER_BLOB_CANT_HAVE_DEFAULT, "c1"))
 
 		sql = `CREATE TABLE t1(c1 json DEFAULT NULL COMMENT '日志记录',
-	  type          tinyint(10) GENERATED ALWAYS AS (json_extract(operate_info, '$.type')) VIRTUAL COMMENT '操作类型')
+	  type1 tinyint(10) GENERATED ALWAYS AS (json_extract(operate_info, '$.type')) VIRTUAL COMMENT '操作类型')
 	  ENGINE = InnoDB DEFAULT CHARSET = utf8 COMMENT ='xxx';`
 		s.testErrorCode(c, sql)
 
 		sql = `CREATE TABLE t1(c1 json COMMENT '日志记录',
-	  type  tinyint(10) GENERATED ALWAYS AS (json_extract(operate_info, '$.type')) VIRTUAL COMMENT '操作类型')
+	  type1 tinyint(10) GENERATED ALWAYS AS (json_extract(operate_info, '$.type')) VIRTUAL COMMENT '操作类型')
 	  ENGINE = InnoDB DEFAULT CHARSET = utf8 COMMENT ='xxx';`
 		s.testErrorCode(c, sql)
 
@@ -615,18 +616,18 @@ primary key(id)) comment 'test';`
 		config.GetGlobalConfig().Inc.CheckColumnDefaultValue = true
 
 		sql = `CREATE TABLE t1(c1 json DEFAULT '{}' COMMENT '日志记录',
-	  type tinyint(10) GENERATED ALWAYS AS (json_extract(operate_info, '$.type')) VIRTUAL COMMENT '操作类型')
+	  type1 tinyint(10) GENERATED ALWAYS AS (json_extract(operate_info, '$.type')) VIRTUAL COMMENT '操作类型')
 	  ENGINE = InnoDB DEFAULT CHARSET = utf8 COMMENT ='xxx';`
 		s.testErrorCode(c, sql,
 			session.NewErr(session.ER_BLOB_CANT_HAVE_DEFAULT, "c1"))
 
 		sql = `CREATE TABLE t1(c1 json DEFAULT NULL COMMENT '日志记录',
-	  type          tinyint(10) GENERATED ALWAYS AS (json_extract(operate_info, '$.type')) VIRTUAL COMMENT '操作类型')
+	  type1 tinyint(10) GENERATED ALWAYS AS (json_extract(operate_info, '$.type')) VIRTUAL COMMENT '操作类型')
 	  ENGINE = InnoDB DEFAULT CHARSET = utf8 COMMENT ='xxx';`
 		s.testErrorCode(c, sql)
 
 		sql = `CREATE TABLE t1(c1 json COMMENT '日志记录',
-	  type  tinyint(10) GENERATED ALWAYS AS (json_extract(operate_info, '$.type')) VIRTUAL COMMENT '操作类型')
+	  type1 tinyint(10) GENERATED ALWAYS AS (json_extract(operate_info, '$.type')) VIRTUAL COMMENT '操作类型')
 	  ENGINE = InnoDB DEFAULT CHARSET = utf8 COMMENT ='xxx';`
 		s.testErrorCode(c, sql)
 
@@ -776,14 +777,14 @@ primary key(id)) comment 'test';`
 	s.testErrorCode(c, sql,
 		session.NewErr(session.ER_WRONG_NAME_FOR_INDEX, "NULL", "test_error_code_3"),
 		session.NewErr(session.ER_INDEX_NAME_UNIQ_PREFIX, "",
-			config.GetGlobalConfig().Inc.UniqIndexPrefix, "test_error_code_3"),
+			"test_error_code_3", config.GetGlobalConfig().Inc.UniqIndexPrefix),
 		session.NewErr(session.ER_TOO_LONG_KEY, "", indexMaxLength))
 
 	sql = "create table test_error_code_3(a text, key (a(3073)));"
 	s.testErrorCode(c, sql,
 		session.NewErr(session.ER_WRONG_NAME_FOR_INDEX, "NULL", "test_error_code_3"),
 		session.NewErr(session.ER_INDEX_NAME_IDX_PREFIX, "",
-			config.GetGlobalConfig().Inc.IndexPrefix, "test_error_code_3"),
+			"test_error_code_3", config.GetGlobalConfig().Inc.IndexPrefix),
 		session.NewErr(session.ER_TOO_LONG_KEY, "", indexMaxLength))
 
 	config.GetGlobalConfig().Inc.TablePrefix = "t_"

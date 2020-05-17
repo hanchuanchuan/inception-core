@@ -1659,6 +1659,8 @@ func (s *session) mysqlServerVersion() {
 					s.dbType = DBTypeMariaDB
 				} else if strings.Contains(strings.ToLower(value), "tidb") {
 					s.dbType = DBTypeTiDB
+				} else {
+					s.dbType = DBTypeMysql
 				}
 
 				versionStr := strings.Split(value, "-")[0]

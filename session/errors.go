@@ -424,7 +424,7 @@ var ErrorsChinese = map[ErrorCode]string{
 	ER_TOO_LONG_IDENT:                   "名称 '%s' 过长.",
 	ER_UDPATE_TOO_MUCH_ROWS:             "预计一次更新(%d行)超过 %d 行.",
 	ER_INSERT_TOO_MUCH_ROWS:             "一次新增(%d行)超过 %d 行.",
-	ER_CHANGE_TOO_MUCH_ROWS:             "预计影响行数(%d行)超过 %d 行.",
+	ER_CHANGE_TOO_MUCH_ROWS:             "%s预计影响行数(%d行)超过 %d 行.",
 	ER_WRONG_NAME_FOR_INDEX:             "索引 '%s' 名称不正确(表 '%s').",
 	ER_TOO_MANY_KEYS:                    "表 '%s' 指定了太多索引, 最多允许 %d 个.",
 	ER_NOT_SUPPORTED_KEY_TYPE:           "不允许的键类型: '%s'.",

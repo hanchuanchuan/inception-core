@@ -79,6 +79,7 @@ func NewInception() Session {
 	tz := timeutil.InferSystemTZ()
 	timeutil.SetSystemTZ(tz)
 
+	s.SetProcessInfo("", time.Now())
 	return s
 }
 

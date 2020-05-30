@@ -58,7 +58,7 @@ type Session interface {
 	ExecuteInc(context.Context, string) ([]sqlexec.RecordSet, error) // Execute a sql statement.
 
 	SetConnectionID(uint64)
-	SetProcessInfo(string, time.Time, byte)
+	SetProcessInfo(string, time.Time)
 
 	SetCollation(coID int) error
 	SetSessionManager(util.SessionManager)
@@ -398,7 +398,7 @@ func (s *session) ParseSQL(ctx context.Context, sql, charset, collation string) 
 	return stmts, err
 }
 
-func (s *session) SetProcessInfo(sql string, t time.Time, command byte) {
+func (s *session) SetProcessInfo(sql string, t time.Time) {
 	pi := util.ProcessInfo{
 		ID:        s.sessionVars.ConnectionID,
 		DB:        s.sessionVars.CurrentDB,
@@ -416,7 +416,6 @@ func (s *session) SetProcessInfo(sql string, t time.Time, command byte) {
 }
 
 func (s *session) SetMyProcessInfo(sql string, t time.Time, percent float64) {
-
 	tmp := s.processInfo.Load()
 	if tmp != nil {
 		pi := tmp.(util.ProcessInfo)

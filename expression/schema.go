@@ -16,7 +16,7 @@ package expression
 import (
 	"strings"
 
-	"github.com/hanchuanchuan/inception-core/ast"
+	"github.com/hanchuanchuan/goInception/ast"
 	"github.com/pingcap/errors"
 )
 

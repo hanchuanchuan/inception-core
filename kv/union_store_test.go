@@ -14,8 +14,8 @@
 package kv
 
 import (
+	"github.com/hanchuanchuan/goInception/util/testleak"
 	"github.com/hanchuanchuan/inception-core/terror"
-	"github.com/hanchuanchuan/inception-core/util/testleak"
 	. "github.com/pingcap/check"
 )
 

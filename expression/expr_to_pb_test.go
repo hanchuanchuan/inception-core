@@ -16,12 +16,12 @@ package expression
 import (
 	"encoding/json"
 
-	"github.com/hanchuanchuan/inception-core/ast"
-	"github.com/hanchuanchuan/inception-core/mysql"
-	"github.com/hanchuanchuan/inception-core/sessionctx/stmtctx"
-	"github.com/hanchuanchuan/inception-core/types"
-	"github.com/hanchuanchuan/inception-core/util/charset"
-	"github.com/hanchuanchuan/inception-core/util/mock"
+	"github.com/hanchuanchuan/goInception/ast"
+	"github.com/hanchuanchuan/goInception/mysql"
+	"github.com/hanchuanchuan/goInception/sessionctx/stmtctx"
+	"github.com/hanchuanchuan/goInception/types"
+	"github.com/hanchuanchuan/goInception/util/charset"
+	"github.com/hanchuanchuan/goInception/util/mock"
 	. "github.com/pingcap/check"
 )
 

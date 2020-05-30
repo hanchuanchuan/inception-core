@@ -20,8 +20,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hanchuanchuan/goInception/mysql"
 	"github.com/hanchuanchuan/inception-core/kv"
-	"github.com/hanchuanchuan/inception-core/mysql"
 	"github.com/hanchuanchuan/inception-core/terror"
 	"github.com/pingcap/errors"
 	log "github.com/sirupsen/logrus"

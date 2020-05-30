@@ -14,7 +14,7 @@
 package codec
 
 import (
-	"github.com/hanchuanchuan/inception-core/types"
+	"github.com/hanchuanchuan/goInception/types"
 	"github.com/pingcap/errors"
 )
 

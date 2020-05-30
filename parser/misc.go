@@ -16,8 +16,8 @@ package parser
 import (
 	"strings"
 
-	"github.com/hanchuanchuan/inception-core/util/charset"
-	"github.com/hanchuanchuan/inception-core/util/hack"
+	"github.com/hanchuanchuan/goInception/util/charset"
+	"github.com/hanchuanchuan/goInception/util/hack"
 )
 
 func isLetter(ch rune) bool {

@@ -14,11 +14,11 @@
 package table
 
 import (
+	"github.com/hanchuanchuan/goInception/model"
+	"github.com/hanchuanchuan/goInception/sessionctx/stmtctx"
+	"github.com/hanchuanchuan/goInception/types"
 	"github.com/hanchuanchuan/inception-core/kv"
-	"github.com/hanchuanchuan/inception-core/model"
 	"github.com/hanchuanchuan/inception-core/sessionctx"
-	"github.com/hanchuanchuan/inception-core/sessionctx/stmtctx"
-	"github.com/hanchuanchuan/inception-core/types"
 )
 
 // IndexIterator is the interface for iterator of index data on KV store.

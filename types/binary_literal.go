@@ -22,7 +22,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hanchuanchuan/inception-core/sessionctx/stmtctx"
+	"github.com/hanchuanchuan/goInception/sessionctx/stmtctx"
 	"github.com/pingcap/errors"
 )
 

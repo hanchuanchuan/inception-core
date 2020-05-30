@@ -25,11 +25,11 @@ import (
 	"testing"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/hanchuanchuan/inception-core/ast"
+	"github.com/hanchuanchuan/goInception/ast"
+	"github.com/hanchuanchuan/goInception/util/logutil"
 	"github.com/hanchuanchuan/inception-core/config"
 	"github.com/hanchuanchuan/inception-core/parser"
 	"github.com/hanchuanchuan/inception-core/session"
-	"github.com/hanchuanchuan/inception-core/util/logutil"
 	"github.com/jinzhu/gorm"
 	. "github.com/pingcap/check"
 

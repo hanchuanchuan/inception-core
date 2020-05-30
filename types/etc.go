@@ -21,10 +21,10 @@ import (
 	"io"
 	"strings"
 
-	"github.com/hanchuanchuan/inception-core/mysql"
-	"github.com/hanchuanchuan/inception-core/parser/opcode"
+	"github.com/hanchuanchuan/goInception/mysql"
+	"github.com/hanchuanchuan/goInception/parser/opcode"
+	"github.com/hanchuanchuan/goInception/util/charset"
 	"github.com/hanchuanchuan/inception-core/terror"
-	"github.com/hanchuanchuan/inception-core/util/charset"
 	"github.com/pingcap/errors"
 )
 

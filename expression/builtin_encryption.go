@@ -28,13 +28,13 @@ import (
 	"io"
 	"strings"
 
-	"github.com/hanchuanchuan/inception-core/mysql"
+	"github.com/hanchuanchuan/goInception/mysql"
+	"github.com/hanchuanchuan/goInception/types"
+	"github.com/hanchuanchuan/goInception/util/auth"
+	"github.com/hanchuanchuan/goInception/util/chunk"
+	"github.com/hanchuanchuan/goInception/util/encrypt"
 	"github.com/hanchuanchuan/inception-core/sessionctx"
 	"github.com/hanchuanchuan/inception-core/sessionctx/variable"
-	"github.com/hanchuanchuan/inception-core/types"
-	"github.com/hanchuanchuan/inception-core/util/auth"
-	"github.com/hanchuanchuan/inception-core/util/chunk"
-	"github.com/hanchuanchuan/inception-core/util/encrypt"
 	"github.com/pingcap/errors"
 )
 

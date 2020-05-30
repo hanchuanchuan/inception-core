@@ -39,11 +39,11 @@ FILES     := $$(find $$($(PACKAGE_DIRECTORIES)) -name "*.go" | grep -vE "vendor"
 GOFAIL_ENABLE  := $$(find $$PWD/ -type d | grep -vE "(\.git|vendor)" | xargs gofail enable)
 GOFAIL_DISABLE := $$(find $$PWD/ -type d | grep -vE "(\.git|vendor)" | xargs gofail disable)
 
-LDFLAGS += -X "github.com/hanchuanchuan/inception-core/mysql.TiDBReleaseVersion=$(shell git describe --tags --dirty)"
-LDFLAGS += -X "github.com/hanchuanchuan/inception-core/util/printer.TiDBBuildTS=$(shell date '+%Y-%m-%d %H:%M:%S')"
-LDFLAGS += -X "github.com/hanchuanchuan/inception-core/util/printer.TiDBGitHash=$(shell git rev-parse HEAD)"
-LDFLAGS += -X "github.com/hanchuanchuan/inception-core/util/printer.TiDBGitBranch=$(shell git rev-parse --abbrev-ref HEAD)"
-LDFLAGS += -X "github.com/hanchuanchuan/inception-core/util/printer.GoVersion=$(shell go version)"
+LDFLAGS += -X "github.com/hanchuanchuan/goInception/mysql.TiDBReleaseVersion=$(shell git describe --tags --dirty)"
+LDFLAGS += -X "github.com/hanchuanchuan/goInception/util/printer.TiDBBuildTS=$(shell date '+%Y-%m-%d %H:%M:%S')"
+LDFLAGS += -X "github.com/hanchuanchuan/goInception/util/printer.TiDBGitHash=$(shell git rev-parse HEAD)"
+LDFLAGS += -X "github.com/hanchuanchuan/goInception/util/printer.TiDBGitBranch=$(shell git rev-parse --abbrev-ref HEAD)"
+LDFLAGS += -X "github.com/hanchuanchuan/goInception/util/printer.GoVersion=$(shell go version)"
 
 TEST_LDFLAGS =  -X "github.com/hanchuanchuan/inception-core/config.checkBeforeDropLDFlag=1"
 

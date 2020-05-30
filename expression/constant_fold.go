@@ -14,8 +14,8 @@
 package expression
 
 import (
-	"github.com/hanchuanchuan/inception-core/ast"
-	"github.com/hanchuanchuan/inception-core/util/chunk"
+	"github.com/hanchuanchuan/goInception/ast"
+	"github.com/hanchuanchuan/goInception/util/chunk"
 	log "github.com/sirupsen/logrus"
 )
 

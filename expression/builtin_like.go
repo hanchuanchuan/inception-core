@@ -16,10 +16,10 @@ package expression
 import (
 	"regexp"
 
+	"github.com/hanchuanchuan/goInception/types"
+	"github.com/hanchuanchuan/goInception/util/chunk"
+	"github.com/hanchuanchuan/goInception/util/stringutil"
 	"github.com/hanchuanchuan/inception-core/sessionctx"
-	"github.com/hanchuanchuan/inception-core/types"
-	"github.com/hanchuanchuan/inception-core/util/chunk"
-	"github.com/hanchuanchuan/inception-core/util/stringutil"
 	"github.com/pingcap/errors"
 	"github.com/pingcap/tipb/go-tipb"
 )

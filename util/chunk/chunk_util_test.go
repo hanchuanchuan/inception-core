@@ -17,7 +17,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/hanchuanchuan/inception-core/types"
+	"github.com/hanchuanchuan/goInception/types"
 )
 
 func getChk() (*Chunk, *Chunk, []bool) {

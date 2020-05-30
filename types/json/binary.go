@@ -25,8 +25,8 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/hanchuanchuan/goInception/util/hack"
 	"github.com/hanchuanchuan/inception-core/terror"
-	"github.com/hanchuanchuan/inception-core/util/hack"
 	"github.com/pingcap/errors"
 )
 

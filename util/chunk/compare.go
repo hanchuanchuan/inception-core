@@ -16,9 +16,9 @@ package chunk
 import (
 	"sort"
 
-	"github.com/hanchuanchuan/inception-core/mysql"
-	"github.com/hanchuanchuan/inception-core/types"
-	"github.com/hanchuanchuan/inception-core/types/json"
+	"github.com/hanchuanchuan/goInception/mysql"
+	"github.com/hanchuanchuan/goInception/types"
+	"github.com/hanchuanchuan/goInception/types/json"
 )
 
 // CompareFunc is a function to compare the two values in Row, the two columns must have the same type.

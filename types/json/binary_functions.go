@@ -22,7 +22,7 @@ import (
 	"unicode/utf8"
 	"unsafe"
 
-	"github.com/hanchuanchuan/inception-core/util/hack"
+	"github.com/hanchuanchuan/goInception/util/hack"
 	"github.com/pingcap/errors"
 )
 

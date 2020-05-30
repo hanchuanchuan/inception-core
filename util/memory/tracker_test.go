@@ -18,8 +18,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/hanchuanchuan/inception-core/util/logutil"
-	"github.com/hanchuanchuan/inception-core/util/testleak"
+	"github.com/hanchuanchuan/goInception/util/logutil"
+	"github.com/hanchuanchuan/goInception/util/testleak"
 	. "github.com/pingcap/check"
 )
 

@@ -24,9 +24,9 @@ import (
 	"time"
 
 	"github.com/cznic/mathutil"
+	"github.com/hanchuanchuan/goInception/util/execdetails"
 	"github.com/hanchuanchuan/inception-core/kv"
 	"github.com/hanchuanchuan/inception-core/store/tikv/tikvrpc"
-	"github.com/hanchuanchuan/inception-core/util/execdetails"
 	"github.com/pingcap/errors"
 	"github.com/pingcap/kvproto/pkg/coprocessor"
 	"github.com/pingcap/kvproto/pkg/kvrpcpb"

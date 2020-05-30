@@ -27,19 +27,18 @@
 
 package parser
 
-import __yyfmt__ "fmt"
-
 import (
 	"fmt"
+	__yyfmt__ "fmt"
 	"strings"
 
-	"github.com/hanchuanchuan/inception-core/ast"
-	"github.com/hanchuanchuan/inception-core/model"
-	"github.com/hanchuanchuan/inception-core/mysql"
-	"github.com/hanchuanchuan/inception-core/parser/opcode"
-	"github.com/hanchuanchuan/inception-core/types"
-	"github.com/hanchuanchuan/inception-core/util/auth"
-	"github.com/hanchuanchuan/inception-core/util/charset"
+	"github.com/hanchuanchuan/goInception/ast"
+	"github.com/hanchuanchuan/goInception/model"
+	"github.com/hanchuanchuan/goInception/mysql"
+	"github.com/hanchuanchuan/goInception/parser/opcode"
+	"github.com/hanchuanchuan/goInception/types"
+	"github.com/hanchuanchuan/goInception/util/auth"
+	"github.com/hanchuanchuan/goInception/util/charset"
 )
 
 type yySymType struct {

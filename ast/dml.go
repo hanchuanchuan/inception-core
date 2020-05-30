@@ -16,10 +16,10 @@ package ast
 import (
 	"strings"
 
-	. "github.com/hanchuanchuan/inception-core/format"
-	"github.com/hanchuanchuan/inception-core/model"
-	"github.com/hanchuanchuan/inception-core/mysql"
-	"github.com/hanchuanchuan/inception-core/util/auth"
+	. "github.com/hanchuanchuan/goInception/format"
+	"github.com/hanchuanchuan/goInception/model"
+	"github.com/hanchuanchuan/goInception/mysql"
+	"github.com/hanchuanchuan/goInception/util/auth"
 	"github.com/pingcap/errors"
 )
 

@@ -16,9 +16,9 @@ package sessionctx
 import (
 	"fmt"
 
+	"github.com/hanchuanchuan/goInception/util"
 	"github.com/hanchuanchuan/inception-core/kv"
 	"github.com/hanchuanchuan/inception-core/sessionctx/variable"
-	"github.com/hanchuanchuan/inception-core/util"
 	"golang.org/x/net/context"
 )
 

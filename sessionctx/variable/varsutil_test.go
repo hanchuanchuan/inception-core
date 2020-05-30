@@ -18,11 +18,11 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/hanchuanchuan/goInception/mysql"
+	"github.com/hanchuanchuan/goInception/types"
+	"github.com/hanchuanchuan/goInception/util/testleak"
 	"github.com/hanchuanchuan/inception-core/config"
-	"github.com/hanchuanchuan/inception-core/mysql"
 	"github.com/hanchuanchuan/inception-core/terror"
-	"github.com/hanchuanchuan/inception-core/types"
-	"github.com/hanchuanchuan/inception-core/util/testleak"
 	. "github.com/pingcap/check"
 )
 

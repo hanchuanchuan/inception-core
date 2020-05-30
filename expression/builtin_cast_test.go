@@ -19,12 +19,12 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/hanchuanchuan/inception-core/mysql"
+	"github.com/hanchuanchuan/goInception/mysql"
+	"github.com/hanchuanchuan/goInception/types"
+	"github.com/hanchuanchuan/goInception/types/json"
+	"github.com/hanchuanchuan/goInception/util/charset"
+	"github.com/hanchuanchuan/goInception/util/chunk"
 	"github.com/hanchuanchuan/inception-core/terror"
-	"github.com/hanchuanchuan/inception-core/types"
-	"github.com/hanchuanchuan/inception-core/types/json"
-	"github.com/hanchuanchuan/inception-core/util/charset"
-	"github.com/hanchuanchuan/inception-core/util/chunk"
 	. "github.com/pingcap/check"
 )
 

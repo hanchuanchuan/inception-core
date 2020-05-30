@@ -18,12 +18,12 @@
 package table
 
 import (
+	"github.com/hanchuanchuan/goInception/model"
+	"github.com/hanchuanchuan/goInception/mysql"
+	"github.com/hanchuanchuan/goInception/types"
 	"github.com/hanchuanchuan/inception-core/kv"
-	"github.com/hanchuanchuan/inception-core/model"
-	"github.com/hanchuanchuan/inception-core/mysql"
 	"github.com/hanchuanchuan/inception-core/sessionctx"
 	"github.com/hanchuanchuan/inception-core/terror"
-	"github.com/hanchuanchuan/inception-core/types"
 )
 
 // Type , the type of table, store data in different ways.

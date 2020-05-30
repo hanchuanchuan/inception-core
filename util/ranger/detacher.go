@@ -14,11 +14,11 @@
 package ranger
 
 import (
-	"github.com/hanchuanchuan/inception-core/ast"
+	"github.com/hanchuanchuan/goInception/ast"
+	"github.com/hanchuanchuan/goInception/model"
+	"github.com/hanchuanchuan/goInception/types"
 	"github.com/hanchuanchuan/inception-core/expression"
-	"github.com/hanchuanchuan/inception-core/model"
 	"github.com/hanchuanchuan/inception-core/sessionctx"
-	"github.com/hanchuanchuan/inception-core/types"
 	"github.com/pingcap/errors"
 )
 

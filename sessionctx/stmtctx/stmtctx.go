@@ -18,9 +18,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hanchuanchuan/inception-core/mysql"
-	"github.com/hanchuanchuan/inception-core/util/execdetails"
-	"github.com/hanchuanchuan/inception-core/util/memory"
+	"github.com/hanchuanchuan/goInception/mysql"
+	"github.com/hanchuanchuan/goInception/util/execdetails"
+	"github.com/hanchuanchuan/goInception/util/memory"
 )
 
 const (

@@ -17,11 +17,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hanchuanchuan/inception-core/ast"
-	. "github.com/hanchuanchuan/inception-core/ast"
-	. "github.com/hanchuanchuan/inception-core/format"
+	"github.com/hanchuanchuan/goInception/ast"
+	. "github.com/hanchuanchuan/goInception/ast"
+	. "github.com/hanchuanchuan/goInception/format"
 	"github.com/hanchuanchuan/inception-core/parser"
-	// "github.com/hanchuanchuan/inception-core/types/parser_driver"
+
+	// "github.com/hanchuanchuan/goInception/types/parser_driver"
 	. "github.com/pingcap/check"
 )
 

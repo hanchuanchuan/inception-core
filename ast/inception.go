@@ -14,8 +14,8 @@
 package ast
 
 import (
-	. "github.com/hanchuanchuan/inception-core/format"
-	"github.com/hanchuanchuan/inception-core/util/auth"
+	. "github.com/hanchuanchuan/goInception/format"
+	"github.com/hanchuanchuan/goInception/util/auth"
 )
 
 var (

@@ -14,8 +14,8 @@
 package ast_test
 
 import (
-	. "github.com/hanchuanchuan/inception-core/ast"
-	"github.com/hanchuanchuan/inception-core/format"
+	. "github.com/hanchuanchuan/goInception/ast"
+	"github.com/hanchuanchuan/goInception/format"
 	. "github.com/pingcap/check"
 )
 

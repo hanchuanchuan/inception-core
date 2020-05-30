@@ -14,11 +14,11 @@
 package session
 
 import (
+	"github.com/hanchuanchuan/goInception/types"
 	"github.com/hanchuanchuan/inception-core/kv"
 	"github.com/hanchuanchuan/inception-core/sessionctx"
 	"github.com/hanchuanchuan/inception-core/sessionctx/binloginfo"
 	"github.com/hanchuanchuan/inception-core/store/tikv/oracle"
-	"github.com/hanchuanchuan/inception-core/types"
 	"github.com/pingcap/errors"
 	binlog "github.com/pingcap/tipb/go-binlog"
 	log "github.com/sirupsen/logrus"
@@ -229,4 +229,3 @@ func (tf *txnFuture) wait() (kv.Transaction, error) {
 	// It would retry get timestamp.
 	return tf.store.Begin()
 }
-

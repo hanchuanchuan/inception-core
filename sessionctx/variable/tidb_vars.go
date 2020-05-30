@@ -16,7 +16,7 @@ package variable
 import (
 	"os"
 
-	"github.com/hanchuanchuan/inception-core/mysql"
+	"github.com/hanchuanchuan/goInception/mysql"
 )
 
 /*

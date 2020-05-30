@@ -19,13 +19,13 @@ import (
 	"sync"
 	"time"
 
-	// "github.com/hanchuanchuan/inception-core/ast"
+	// "github.com/hanchuanchuan/goInception/ast"
+	"github.com/hanchuanchuan/goInception/util"
+	"github.com/hanchuanchuan/goInception/util/kvcache"
+	"github.com/hanchuanchuan/goInception/util/sqlexec"
 	"github.com/hanchuanchuan/inception-core/kv"
 	"github.com/hanchuanchuan/inception-core/sessionctx"
 	"github.com/hanchuanchuan/inception-core/sessionctx/variable"
-	"github.com/hanchuanchuan/inception-core/util"
-	"github.com/hanchuanchuan/inception-core/util/kvcache"
-	"github.com/hanchuanchuan/inception-core/util/sqlexec"
 	"github.com/pingcap/errors"
 	"golang.org/x/net/context"
 )

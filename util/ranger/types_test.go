@@ -14,9 +14,9 @@
 package ranger_test
 
 import (
-	"github.com/hanchuanchuan/inception-core/sessionctx/stmtctx"
-	"github.com/hanchuanchuan/inception-core/types"
-	"github.com/hanchuanchuan/inception-core/util/ranger"
+	"github.com/hanchuanchuan/goInception/sessionctx/stmtctx"
+	"github.com/hanchuanchuan/goInception/types"
+	"github.com/hanchuanchuan/goInception/util/ranger"
 	. "github.com/pingcap/check"
 )
 

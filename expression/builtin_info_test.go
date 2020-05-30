@@ -16,15 +16,15 @@ package expression
 import (
 	"math"
 
-	"github.com/hanchuanchuan/inception-core/ast"
-	"github.com/hanchuanchuan/inception-core/mysql"
-	"github.com/hanchuanchuan/inception-core/types"
-	"github.com/hanchuanchuan/inception-core/util/auth"
-	"github.com/hanchuanchuan/inception-core/util/charset"
-	"github.com/hanchuanchuan/inception-core/util/chunk"
-	"github.com/hanchuanchuan/inception-core/util/mock"
-	"github.com/hanchuanchuan/inception-core/util/printer"
-	"github.com/hanchuanchuan/inception-core/util/testleak"
+	"github.com/hanchuanchuan/goInception/ast"
+	"github.com/hanchuanchuan/goInception/mysql"
+	"github.com/hanchuanchuan/goInception/types"
+	"github.com/hanchuanchuan/goInception/util/auth"
+	"github.com/hanchuanchuan/goInception/util/charset"
+	"github.com/hanchuanchuan/goInception/util/chunk"
+	"github.com/hanchuanchuan/goInception/util/mock"
+	"github.com/hanchuanchuan/goInception/util/printer"
+	"github.com/hanchuanchuan/goInception/util/testleak"
 	. "github.com/pingcap/check"
 )
 

@@ -16,10 +16,10 @@ package sqlexec
 import (
 	"context"
 
-	"github.com/hanchuanchuan/inception-core/ast"
+	"github.com/hanchuanchuan/goInception/ast"
+	"github.com/hanchuanchuan/goInception/util/chunk"
 	"github.com/hanchuanchuan/inception-core/sessionctx"
 	"github.com/hanchuanchuan/inception-core/sessionctx/variable"
-	"github.com/hanchuanchuan/inception-core/util/chunk"
 )
 
 // RestrictedSQLExecutor is an interface provides executing restricted sql statement.

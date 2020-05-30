@@ -14,8 +14,8 @@
 package chunk
 
 import (
-	"github.com/hanchuanchuan/inception-core/types"
-	"github.com/hanchuanchuan/inception-core/util/memory"
+	"github.com/hanchuanchuan/goInception/types"
+	"github.com/hanchuanchuan/goInception/util/memory"
 	"github.com/pingcap/errors"
 )
 

@@ -20,14 +20,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hanchuanchuan/inception-core/ast"
-	"github.com/hanchuanchuan/inception-core/model"
-	"github.com/hanchuanchuan/inception-core/mysql"
+	"github.com/hanchuanchuan/goInception/ast"
+	"github.com/hanchuanchuan/goInception/model"
+	"github.com/hanchuanchuan/goInception/mysql"
+	"github.com/hanchuanchuan/goInception/types"
+	"github.com/hanchuanchuan/goInception/util/charset"
+	"github.com/hanchuanchuan/goInception/util/chunk"
+	"github.com/hanchuanchuan/goInception/util/mock"
 	"github.com/hanchuanchuan/inception-core/sessionctx"
-	"github.com/hanchuanchuan/inception-core/types"
-	"github.com/hanchuanchuan/inception-core/util/charset"
-	"github.com/hanchuanchuan/inception-core/util/chunk"
-	"github.com/hanchuanchuan/inception-core/util/mock"
 )
 
 type benchHelper struct {

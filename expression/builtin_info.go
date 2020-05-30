@@ -18,11 +18,11 @@
 package expression
 
 import (
-	"github.com/hanchuanchuan/inception-core/mysql"
+	"github.com/hanchuanchuan/goInception/mysql"
+	"github.com/hanchuanchuan/goInception/types"
+	"github.com/hanchuanchuan/goInception/util/chunk"
+	"github.com/hanchuanchuan/goInception/util/printer"
 	"github.com/hanchuanchuan/inception-core/sessionctx"
-	"github.com/hanchuanchuan/inception-core/types"
-	"github.com/hanchuanchuan/inception-core/util/chunk"
-	"github.com/hanchuanchuan/inception-core/util/printer"
 	"github.com/pingcap/errors"
 )
 

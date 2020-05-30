@@ -12,9 +12,9 @@ import (
 	"strconv"
 	"strings"
 
-	// "github.com/hanchuanchuan/inception-core/types"
-	"github.com/hanchuanchuan/inception-core/ast"
-	"github.com/hanchuanchuan/inception-core/types"
+	// "github.com/hanchuanchuan/goInception/types"
+	"github.com/hanchuanchuan/goInception/ast"
+	"github.com/hanchuanchuan/goInception/types"
 	"github.com/jinzhu/gorm"
 	log "github.com/sirupsen/logrus"
 )

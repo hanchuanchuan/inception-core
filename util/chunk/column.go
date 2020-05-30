@@ -16,8 +16,8 @@ package chunk
 import (
 	"unsafe"
 
-	"github.com/hanchuanchuan/inception-core/types"
-	"github.com/hanchuanchuan/inception-core/types/json"
+	"github.com/hanchuanchuan/goInception/types"
+	"github.com/hanchuanchuan/goInception/types/json"
 )
 
 func (c *column) appendDuration(dur types.Duration) {

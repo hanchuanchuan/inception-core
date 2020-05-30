@@ -17,7 +17,7 @@ import (
 	"fmt"
 	"io"
 
-	. "github.com/hanchuanchuan/inception-core/format"
+	. "github.com/hanchuanchuan/goInception/format"
 	"github.com/pingcap/errors"
 )
 

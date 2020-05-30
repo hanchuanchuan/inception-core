@@ -21,8 +21,8 @@ import (
 	"fmt"
 	// "strconv"
 
+	"github.com/hanchuanchuan/goInception/mysql"
 	"github.com/hanchuanchuan/inception-core/config"
-	"github.com/hanchuanchuan/inception-core/mysql"
 	"github.com/hanchuanchuan/inception-core/terror"
 )
 

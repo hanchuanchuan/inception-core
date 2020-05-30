@@ -14,8 +14,8 @@
 package expression
 
 import (
+	"github.com/hanchuanchuan/goInception/util/chunk"
 	"github.com/hanchuanchuan/inception-core/sessionctx"
-	"github.com/hanchuanchuan/inception-core/util/chunk"
 	"github.com/pingcap/errors"
 )
 

@@ -45,6 +45,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway v1.5.1 // indirect
 	github.com/hanchuanchuan/gh-ost v1.0.49-0.20200114083508-62a578b91654
 	github.com/hanchuanchuan/go-mysql v0.0.0-20200114082439-6d0d8d3a982e
+	github.com/hanchuanchuan/goInception v1.2.3
 	github.com/imroc/req v0.2.3
 	github.com/jinzhu/gorm v1.9.2
 	github.com/jinzhu/inflection v1.0.0 // indirect

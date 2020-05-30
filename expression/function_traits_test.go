@@ -14,8 +14,8 @@
 package expression
 
 import (
-	"github.com/hanchuanchuan/inception-core/ast"
-	"github.com/hanchuanchuan/inception-core/util/testleak"
+	"github.com/hanchuanchuan/goInception/ast"
+	"github.com/hanchuanchuan/goInception/util/testleak"
 	. "github.com/pingcap/check"
 )
 

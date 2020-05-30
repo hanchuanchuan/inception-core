@@ -20,7 +20,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/hanchuanchuan/inception-core/util/testleak"
+	"github.com/hanchuanchuan/goInception/util/testleak"
 	. "github.com/pingcap/check"
 )
 

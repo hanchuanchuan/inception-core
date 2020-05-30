@@ -22,9 +22,9 @@ import (
 	"io/ioutil"
 
 	"github.com/BurntSushi/toml"
-	"github.com/hanchuanchuan/inception-core/mysql"
-	"github.com/hanchuanchuan/inception-core/util"
-	"github.com/hanchuanchuan/inception-core/util/logutil"
+	"github.com/hanchuanchuan/goInception/mysql"
+	"github.com/hanchuanchuan/goInception/util"
+	"github.com/hanchuanchuan/goInception/util/logutil"
 	"github.com/pingcap/errors"
 )
 

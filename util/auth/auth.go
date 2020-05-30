@@ -19,7 +19,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	. "github.com/hanchuanchuan/inception-core/format"
+	. "github.com/hanchuanchuan/goInception/format"
 	"github.com/hanchuanchuan/inception-core/terror"
 	"github.com/pingcap/errors"
 )

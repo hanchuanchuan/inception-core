@@ -16,7 +16,7 @@ package expression
 import (
 	"fmt"
 
-	"github.com/hanchuanchuan/inception-core/model"
+	"github.com/hanchuanchuan/goInception/model"
 	. "github.com/pingcap/check"
 )
 

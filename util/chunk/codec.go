@@ -19,8 +19,8 @@ import (
 	"unsafe"
 
 	"github.com/cznic/mathutil"
-	"github.com/hanchuanchuan/inception-core/mysql"
-	"github.com/hanchuanchuan/inception-core/types"
+	"github.com/hanchuanchuan/goInception/mysql"
+	"github.com/hanchuanchuan/goInception/types"
 )
 
 // Codec is used to:

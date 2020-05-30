@@ -18,10 +18,10 @@ import (
 	"fmt"
 	"sort"
 
-	// "github.com/hanchuanchuan/inception-core/ast"
+	// "github.com/hanchuanchuan/goInception/ast"
+	"github.com/hanchuanchuan/goInception/util/testutil"
 	"github.com/hanchuanchuan/inception-core/kv"
 	"github.com/hanchuanchuan/inception-core/session"
-	"github.com/hanchuanchuan/inception-core/util/testutil"
 	"github.com/pingcap/check"
 )
 

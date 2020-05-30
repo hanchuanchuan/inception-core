@@ -17,7 +17,7 @@ import (
 	"encoding/binary"
 	"unicode/utf8"
 
-	"github.com/hanchuanchuan/inception-core/mysql"
+	"github.com/hanchuanchuan/goInception/mysql"
 	"github.com/hanchuanchuan/inception-core/terror"
 )
 

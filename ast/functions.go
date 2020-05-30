@@ -18,9 +18,9 @@ import (
 	"io"
 	"strings"
 
-	. "github.com/hanchuanchuan/inception-core/format"
-	"github.com/hanchuanchuan/inception-core/model"
-	"github.com/hanchuanchuan/inception-core/types"
+	. "github.com/hanchuanchuan/goInception/format"
+	"github.com/hanchuanchuan/goInception/model"
+	"github.com/hanchuanchuan/goInception/types"
 	"github.com/pingcap/errors"
 )
 

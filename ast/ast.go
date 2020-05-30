@@ -18,10 +18,10 @@ package ast
 import (
 	"io"
 
-	. "github.com/hanchuanchuan/inception-core/format"
-	"github.com/hanchuanchuan/inception-core/model"
-	"github.com/hanchuanchuan/inception-core/types"
-	"github.com/hanchuanchuan/inception-core/util/chunk"
+	. "github.com/hanchuanchuan/goInception/format"
+	"github.com/hanchuanchuan/goInception/model"
+	"github.com/hanchuanchuan/goInception/types"
+	"github.com/hanchuanchuan/goInception/util/chunk"
 	"golang.org/x/net/context"
 )
 

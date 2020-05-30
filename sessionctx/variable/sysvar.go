@@ -17,11 +17,11 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/hanchuanchuan/goInception/mysql"
+	"github.com/hanchuanchuan/goInception/util/charset"
 	"github.com/hanchuanchuan/inception-core/config"
 	"github.com/hanchuanchuan/inception-core/kv"
-	"github.com/hanchuanchuan/inception-core/mysql"
 	"github.com/hanchuanchuan/inception-core/terror"
-	"github.com/hanchuanchuan/inception-core/util/charset"
 )
 
 // ScopeFlag is for system variable whether can be changed in global/session dynamically or not.

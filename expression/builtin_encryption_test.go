@@ -17,13 +17,13 @@ import (
 	"encoding/hex"
 	"strings"
 
-	"github.com/hanchuanchuan/inception-core/ast"
+	"github.com/hanchuanchuan/goInception/ast"
+	"github.com/hanchuanchuan/goInception/types"
+	"github.com/hanchuanchuan/goInception/util/chunk"
+	"github.com/hanchuanchuan/goInception/util/hack"
+	"github.com/hanchuanchuan/goInception/util/testleak"
 	"github.com/hanchuanchuan/inception-core/sessionctx/variable"
 	"github.com/hanchuanchuan/inception-core/terror"
-	"github.com/hanchuanchuan/inception-core/types"
-	"github.com/hanchuanchuan/inception-core/util/chunk"
-	"github.com/hanchuanchuan/inception-core/util/hack"
-	"github.com/hanchuanchuan/inception-core/util/testleak"
 	. "github.com/pingcap/check"
 )
 

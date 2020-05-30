@@ -18,9 +18,9 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/hanchuanchuan/goInception/mysql"
+	"github.com/hanchuanchuan/goInception/util/israce"
 	"github.com/hanchuanchuan/inception-core/config"
-	"github.com/hanchuanchuan/inception-core/mysql"
-	"github.com/hanchuanchuan/inception-core/util/israce"
 	log "github.com/sirupsen/logrus"
 )
 

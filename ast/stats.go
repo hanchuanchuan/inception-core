@@ -14,8 +14,8 @@
 package ast
 
 import (
-	. "github.com/hanchuanchuan/inception-core/format"
-	"github.com/hanchuanchuan/inception-core/model"
+	. "github.com/hanchuanchuan/goInception/format"
+	"github.com/hanchuanchuan/goInception/model"
 	"github.com/pingcap/errors"
 )
 

@@ -354,7 +354,7 @@ func (s *session) executeInc(ctx context.Context, sql string) (recordSets []sqle
 						// 	return nil, errors.Trace(err)
 						// }
 
-						return s.processCommand(ctx, stmtNode, currentSql)
+						return s.CheckStmt(ctx, stmtNode, currentSql)
 					} else {
 						var result []sqlexec.RecordSet
 						var err error
@@ -363,7 +363,7 @@ func (s *session) executeInc(ctx context.Context, sql string) (recordSets []sqle
 						} else if s.opt != nil && s.opt.Split {
 							result, err = s.splitCommand(ctx, stmtNode, currentSql)
 						} else {
-							result, err = s.processCommand(ctx, stmtNode, currentSql)
+							result, err = s.CheckStmt(ctx, stmtNode, currentSql)
 						}
 						if err != nil {
 							return nil, err
@@ -524,7 +524,7 @@ func (s *session) needDataSource(stmtNode ast.StmtNode) bool {
 	return true
 }
 
-func (s *session) processCommand(ctx context.Context, stmtNode ast.StmtNode,
+func (s *session) CheckStmt(ctx context.Context, stmtNode ast.StmtNode,
 	currentSql string) ([]sqlexec.RecordSet, error) {
 	log.Debug("processCommand")
 

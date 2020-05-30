@@ -5464,46 +5464,45 @@ func (s *session) executeLocalShowVariables(node *ast.ShowStmt) ([]sqlexec.Recor
 }
 
 func (s *session) executeLocalShowProcesslist(node *ast.ShowStmt) ([]sqlexec.RecordSet, error) {
-	return nil, nil
-	// pl := s.sessionManager.ShowProcessList()
+	pl := s.sessionManager.ShowProcessList()
 
-	// var keys []int
-	// for k := range pl {
-	// 	keys = append(keys, int(k))
-	// }
-	// sort.Ints(keys)
+	var keys []int
+	for k := range pl {
+		keys = append(keys, int(k))
+	}
+	sort.Ints(keys)
 
-	// res := NewProcessListSets(len(pl))
+	res := NewProcessListSets(len(pl))
 
-	// for _, k := range keys {
-	// 	if pi, ok := pl[uint64(k)]; ok {
-	// 		var info string
-	// 		if node.Full {
-	// 			info = pi.Info
-	// 		} else {
-	// 			info = fmt.Sprintf("%.100v", pi.Info)
-	// 		}
+	for _, k := range keys {
+		if pi, ok := pl[uint64(k)]; ok {
+			var info string
+			if node.Full {
+				info = pi.Info
+			} else {
+				info = fmt.Sprintf("%.100v", pi.Info)
+			}
 
-	// 		data := []interface{}{
-	// 			pi.ID,
-	// 			pi.DestUser,
-	// 			pi.DestHost,
-	// 			pi.DestPort,
-	// 			pi.Host,
-	// 			pi.Command,
-	// 			pi.OperState,
-	// 			int64(time.Since(pi.Time) / time.Second),
-	// 			info,
-	// 		}
-	// 		if pi.Percent > 0 {
-	// 			data = append(data, fmt.Sprintf("%.2f%%", pi.Percent*100))
-	// 		}
-	// 		res.appendRow(data)
-	// 	}
-	// }
+			data := []interface{}{
+				pi.ID,
+				pi.DestUser,
+				pi.DestHost,
+				pi.DestPort,
+				pi.Host,
+				pi.Command,
+				pi.OperState,
+				int64(time.Since(pi.Time) / time.Second),
+				info,
+			}
+			if pi.Percent > 0 {
+				data = append(data, fmt.Sprintf("%.2f%%", pi.Percent*100))
+			}
+			res.appendRow(data)
+		}
+	}
 
-	// s.sessionVars.StmtCtx.AddAffectedRows(uint64(res.rc.count))
-	// return res.Rows(), nil
+	s.sessionVars.StmtCtx.AddAffectedRows(uint64(res.rc.count))
+	return res.Rows(), nil
 }
 
 // splitWhere: 拆分where表达式

@@ -75,6 +75,11 @@ type Session interface {
 	Audit(ctx context.Context, sql string) ([]Record, error)
 	// RunExecute 执行
 	RunExecute(ctx context.Context, sql string) ([]Record, error)
+
+	// 特殊SQL审核
+	CheckStmt(ctx context.Context, stmtNode ast.StmtNode,
+		currentSQL string) ([]sqlexec.RecordSet, error)
+
 	// 拆分
 	Split(ctx context.Context, sql string) ([]SplitRecord, error)
 	// 打印语法树

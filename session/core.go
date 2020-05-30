@@ -384,7 +384,7 @@ func (s *session) audit(ctx context.Context, sql string) (err error) {
 				} else if s.opt != nil && s.opt.Split {
 					result, err = s.splitCommand(ctx, stmtNode, currentSQL)
 				} else {
-					result, err = s.processCommand(ctx, stmtNode, currentSQL)
+					result, err = s.CheckStmt(ctx, stmtNode, currentSQL)
 				}
 				if err != nil {
 					return err

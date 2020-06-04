@@ -356,7 +356,7 @@ func (s *session) audit(ctx context.Context, sql string) (err error) {
 						ErrorMessage: err.Error(),
 					})
 				}
-				return err
+				return nil
 			}
 
 			for i, stmtNode := range stmtNodes {

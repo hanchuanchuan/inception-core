@@ -556,5 +556,8 @@ func (s *session) checkOptions() error {
 		s.appendErrorMessage("TiDB暂不支持备份功能.")
 	}
 
+	if s.opt.DB != "" {
+		s.dbName = s.opt.DB
+	}
 	return nil
 }

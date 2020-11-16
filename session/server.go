@@ -27,7 +27,7 @@ import (
 // Server is the MySQL protocol server
 type Server struct {
 	rwlock  *sync.RWMutex
-	clients map[uint32]*session
+	clients map[uint64]*session
 	// osc进程列表
 	oscProcessList map[string]*util.OscProcessInfo
 }
@@ -76,7 +76,7 @@ func (s *Server) Kill(connectionID uint64, query bool) {
 	defer s.rwlock.Unlock()
 	log.Infof("[server] Kill connectionID %d, query %t]", connectionID, query)
 
-	conn, ok := s.clients[uint32(connectionID)]
+	conn, ok := s.clients[connectionID]
 	if !ok {
 		return
 	}
@@ -88,3 +88,10 @@ func (s *Server) Kill(connectionID uint64, query bool) {
 		cancelFunc()
 	}
 }
+
+const (
+	connStatusDispatching int32 = iota
+	connStatusReading
+	connStatusShutdown     // Closed by server.
+	connStatusWaitShutdown // Notified by server to close.
+)

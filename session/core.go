@@ -81,6 +81,10 @@ func NewInception() Session {
 	tz := timeutil.InferSystemTZ()
 	timeutil.SetSystemTZ(tz)
 
+	server.rwlock.RLock()
+	server.clients[s.sessionVars.ConnectionID] = s
+	server.rwlock.RUnlock()
+
 	s.SetSessionManager(server)
 	s.SetProcessInfo("", time.Now())
 	return s
@@ -574,7 +578,7 @@ func (s *session) checkOptions() error {
 func init() {
 	server = &Server{
 		rwlock:         &sync.RWMutex{},
-		clients:        make(map[uint32]*session),
+		clients:        make(map[uint64]*session),
 		oscProcessList: make(map[string]*util.OscProcessInfo),
 	}
 }

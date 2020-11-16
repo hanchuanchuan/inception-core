@@ -132,3 +132,26 @@ func (s *testInceptionSuite) TestDropTable(c *C) {
 		}
 	}
 }
+
+func (s *testInceptionSuite) TestProcesslist(c *C) {
+	core := session.NewInception()
+	core.LoadOptions(session.SourceOptions{
+		Host:     "127.0.0.1",
+		Port:     3306,
+		User:     "test",
+		Password: "test",
+	})
+	sql := `inception show processlist;`
+	result, err := core.Audit(context.Background(), sql)
+	c.Assert(err, IsNil)
+	fmt.Println(fmt.Sprintf("result: %#v", result))
+
+	for _, row := range result {
+		// fmt.Println(fmt.Sprintf("%#v", row))
+		if row.ErrLevel == 2 {
+			fmt.Println(fmt.Sprintf("sql: %v, err: %v", row.Sql, row.ErrorMessage))
+		} else {
+			fmt.Println(fmt.Sprintf("[%v] sql: %v", session.StatusList[row.StageStatus], row.Sql))
+		}
+	}
+}

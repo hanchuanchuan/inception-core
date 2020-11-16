@@ -71,7 +71,7 @@ const (
 
 func (s *session) ExecuteInc(ctx context.Context, sql string) (recordSets []sqlexec.RecordSet, err error) {
 
-	s.init()
+	s.init(ctx)
 	defer s.clear()
 
 	// f, err := os.Create("profile_cpu")

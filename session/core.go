@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"fmt"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -38,6 +39,7 @@ import (
 )
 
 var baseConnID uint64
+var server *Server
 
 func (s *session) makeNewResult() []Record {
 	// if s.opt != nil && s.opt.Print && s.printSets != nil {
@@ -79,12 +81,19 @@ func NewInception() Session {
 	tz := timeutil.InferSystemTZ()
 	timeutil.SetSystemTZ(tz)
 
+	s.SetSessionManager(server)
 	s.SetProcessInfo("", time.Now())
 	return s
 }
 
 // init 初始化map
-func (s *session) init() {
+func (s *session) init(ctx context.Context) {
+	var cancelFunc context.CancelFunc
+	ctx, cancelFunc = context.WithCancel(ctx)
+	s.mu.Lock()
+	s.mu.cancelFunc = cancelFunc
+	s.mu.Unlock()
+
 	s.dbName = ""
 	s.haveBegin = false
 	s.haveCommit = false
@@ -150,7 +159,7 @@ func (s *session) Audit(ctx context.Context, sql string) ([]Record, error) {
 		return nil, errors.New("未配置数据源信息!")
 	}
 
-	s.init()
+	s.init(ctx)
 	defer s.clear()
 	s.opt.Check = true
 	err := s.audit(ctx, sql)
@@ -168,7 +177,7 @@ func (s *session) RunExecute(ctx context.Context, sql string) ([]Record, error) 
 		return nil, errors.New("未配置数据源信息!")
 	}
 
-	s.init()
+	s.init(ctx)
 	defer s.clear()
 
 	s.opt.Check = false
@@ -196,7 +205,7 @@ func (s *session) Print(ctx context.Context, sql string) ([]PrintRecord, error) 
 	if s.opt == nil {
 		return nil, errors.New("未配置数据源信息!")
 	}
-	s.init()
+	s.init(ctx)
 	defer s.clear()
 	s.opt.Print = true
 	err := s.audit(ctx, sql)
@@ -213,7 +222,7 @@ func (s *session) Split(ctx context.Context, sql string) ([]SplitRecord, error) 
 	if s.opt == nil {
 		return nil, errors.New("未配置数据源信息!")
 	}
-	s.init()
+	s.init(ctx)
 	defer s.clear()
 	s.opt.Split = true
 	err := s.audit(ctx, sql)
@@ -560,4 +569,16 @@ func (s *session) checkOptions() error {
 		s.dbName = s.opt.DB
 	}
 	return nil
+}
+
+func init() {
+	server = &Server{
+		rwlock:         &sync.RWMutex{},
+		clients:        make(map[uint32]*session),
+		oscProcessList: make(map[string]*util.OscProcessInfo),
+	}
+}
+
+func GetServer() *Server {
+	return server
 }

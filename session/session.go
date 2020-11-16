@@ -106,7 +106,8 @@ type session struct {
 
 	mu struct {
 		sync.RWMutex
-		values map[fmt.Stringer]interface{}
+		values     map[fmt.Stringer]interface{}
+		cancelFunc context.CancelFunc
 	}
 
 	// store kv.Storage
